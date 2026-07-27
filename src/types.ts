@@ -1,4 +1,5 @@
 import type { Abi, Address, Chain, Transport, PublicClient, WalletClient, Account } from 'viem'
+import type { EIP1193Provider, Eip1193Provider } from './providers/BrowserProvider.js'
 
 export type WhiteChainAddresses = {
   grant: Address
@@ -10,10 +11,11 @@ export type WhiteChainAbis = {
 
 export type WhiteChainConfig = {
   chain: Chain
-  transport: Transport
+  transport?: Transport
+  provider?: EIP1193Provider | Eip1193Provider
   addresses: WhiteChainAddresses
   abis?: WhiteChainAbis
-  account?: Account
+  account?: Account | Address
   clients?: Partial<ClientDeps>
 }
 
