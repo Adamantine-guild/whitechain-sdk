@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import type { Abi, Address } from 'viem'
-import { createGrantChainClient } from '../src'
+import { createWhiteChainClient } from '../src'
 
 const dummyAbi = [
   { type: 'function', name: 'submitApplication', stateMutability: 'nonpayable', inputs: [
@@ -38,11 +38,11 @@ const dummyAbi = [
 
 const grantAddress = '0x000000000000000000000000000000000000dEaD' as Address
 
-describe('GrantChainClient', () => {
+describe('WhiteChainClient', () => {
   it('calls write methods with expected args', async () => {
     const writeContract = vi.fn().mockResolvedValue('0xhash')
     const readContract = vi.fn()
-    const client = createGrantChainClient({
+    const client = createWhiteChainClient({
       // use any to avoid heavy chain typing for unit tests
       chain: {} as any,
       transport: {} as any,
@@ -77,7 +77,7 @@ describe('GrantChainClient', () => {
       // getMilestones
       .mockResolvedValueOnce([[1n, 2, 'ipfs://e1'], [2n, 3, '']])
 
-    const client = createGrantChainClient({
+    const client = createWhiteChainClient({
       chain: {} as any,
       transport: {} as any,
       addresses: { grant: grantAddress },

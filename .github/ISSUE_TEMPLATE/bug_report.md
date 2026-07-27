@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a bug in GrantChain SDK
+about: Report a bug in WhiteChain SDK
 title: '[BUG] '
 labels: bug
 assignees: ''
@@ -29,7 +29,7 @@ A clear and concise description of what actually happened.
 
 - Node.js version:
 - npm version:
-- GrantChain SDK version:
+- WhiteChain SDK version:
 - Operating system:
 
 ## Additional Context

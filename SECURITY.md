@@ -2,7 +2,7 @@
 
 ## Reporting Security Vulnerabilities
 
-If you discover a security vulnerability in GrantChain SDK, please report it responsibly.
+If you discover a security vulnerability in WhiteChain SDK, please report it responsibly.
 
 ### How to Report
 
@@ -32,7 +32,7 @@ Include the following information:
 
 ## Security Best Practices
 
-When using GrantChain SDK:
+When using WhiteChain SDK:
 
 - Never commit private keys or sensitive credentials
 - Use environment variables for configuration
@@ -60,4 +60,4 @@ We follow responsible disclosure principles:
 - Provide sufficient information for maintainers to reproduce and fix the issue
 - Work with maintainers to coordinate disclosure timing
 
-Thank you for helping keep GrantChain SDK secure!
+Thank you for helping keep WhiteChain SDK secure!

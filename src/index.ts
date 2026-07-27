@@ -1,12 +1,12 @@
 export {
-  createGrantChainClient,
-  type GrantChainClient,
+  createWhiteChainClient,
+  type WhiteChainClient,
 } from './client'
 
 export type {
-  GrantChainConfig,
-  GrantChainAddresses,
-  GrantChainAbis,
+  WhiteChainConfig,
+  WhiteChainAddresses,
+  WhiteChainAbis,
   ApplicationId,
   MilestoneId,
   GrantId,
@@ -20,5 +20,5 @@ export type {
   Milestone,
 } from './types'
 
-export { GrantChainError, TODO } from './types'
+export { WhiteChainError, TODO } from './types'
 

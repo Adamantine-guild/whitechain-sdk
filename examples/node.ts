@@ -1,4 +1,4 @@
-import { createGrantChainClient } from '../src'
+import { createWhiteChainClient } from '../src'
 import { http } from 'viem'
 import { mainnet } from 'viem/chains'
 import type { Abi } from 'viem'
@@ -9,7 +9,7 @@ async function main() {
 
   const grantAbi: Abi = [] // provide the real ABI here
 
-  const client = createGrantChainClient({
+  const client = createWhiteChainClient({
     chain: mainnet,
     transport: http(RPC_URL),
     addresses: { grant: GRANT_ADDRESS as any },

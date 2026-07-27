@@ -1,22 +1,22 @@
-# GrantChain SDK (MVP)
+# WhiteChain SDK (MVP)
 
 Minimal TypeScript SDK that wraps the MVP contract actions and simple reads using viem. Keep it small, typed, and future-friendly without overengineering.
 
 ## Install
 
 ```bash
-npm i grantchain-sdk viem
+npm i whitechain-sdk viem
 ```
 
 ## Quick Start
 
 ```ts
-import { createGrantChainClient } from 'grantchain-sdk'
+import { createWhiteChainClient } from 'whitechain-sdk'
 import { http } from 'viem'
 import { mainnet } from 'viem/chains'
 import type { Abi, Address } from 'viem'
 
-const client = createGrantChainClient({
+const client = createWhiteChainClient({
   chain: mainnet,
   transport: http('https://rpc.your.network'),
   addresses: { grant: '0xGrantContract' as Address },
@@ -33,7 +33,7 @@ await client.submitApplication({ grantId: 1n, applicant: '0x...', metadataUri: '
 
 ## Supported Methods
 
-- createGrantChainClient
+- createWhiteChainClient
 - submitApplication
 - approveApplication
 - submitMilestoneEvidence

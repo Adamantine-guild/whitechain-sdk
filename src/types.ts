@@ -1,18 +1,18 @@
 import type { Abi, Address, Chain, Transport, PublicClient, WalletClient, Account } from 'viem'
 
-export type GrantChainAddresses = {
+export type WhiteChainAddresses = {
   grant: Address
 }
 
-export type GrantChainAbis = {
+export type WhiteChainAbis = {
   grant?: Abi
 }
 
-export type GrantChainConfig = {
+export type WhiteChainConfig = {
   chain: Chain
   transport: Transport
-  addresses: GrantChainAddresses
-  abis?: GrantChainAbis
+  addresses: WhiteChainAddresses
+  abis?: WhiteChainAbis
   account?: Account
   clients?: Partial<ClientDeps>
 }
@@ -70,10 +70,10 @@ export type Milestone = {
 
 export type MinimalReadResult<T> = Promise<T>
 
-export class GrantChainError extends Error {
+export class WhiteChainError extends Error {
   constructor(message: string) {
     super(message)
-    this.name = 'GrantChainError'
+    this.name = 'WhiteChainError'
   }
 }
 

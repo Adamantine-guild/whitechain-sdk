@@ -1,8 +1,8 @@
 {
-  "name": "grantchain-sdk",
+  "name": "whitechain-sdk",
   "version": "0.1.0",
   "private": false,
-  "description": "Minimal TypeScript SDK for GrantChain MVP using viem",
+  "description": "Minimal TypeScript SDK for WhiteChain MVP using viem",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -24,7 +24,7 @@
     "test": "vitest run"
   },
   "keywords": [
-    "grantchain",
+    "whitechain",
     "sdk",
     "viem",
     "mvp"

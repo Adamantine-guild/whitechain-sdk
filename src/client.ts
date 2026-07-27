@@ -1,6 +1,6 @@
 import { createPublicClient, createWalletClient, http, type Address, type Abi, type Hash } from 'viem'
 import type {
-  GrantChainConfig,
+  WhiteChainConfig,
   ClientDeps,
   SubmitApplicationParams,
   ApproveApplicationParams,
@@ -11,14 +11,14 @@ import type {
   GrantApplication,
   Milestone,
 } from './types'
-import { GrantChainError } from './types'
+import { WhiteChainError } from './types'
 
 const ensure = <T>(value: T | undefined, message: string): T => {
-  if (value === undefined || value === null) throw new GrantChainError(message)
+  if (value === undefined || value === null) throw new WhiteChainError(message)
   return value
 }
 
-export type GrantChainClient = ClientDeps & {
+export type WhiteChainClient = ClientDeps & {
   addresses: { grant: Address }
   abis: { grant?: Abi }
   submitApplication(params: SubmitApplicationParams): Promise<Hash>
@@ -33,7 +33,7 @@ export type GrantChainClient = ClientDeps & {
 
 const defaultTransport = http()
 
-export function createGrantChainClient(config: GrantChainConfig): GrantChainClient {
+export function createWhiteChainClient(config: WhiteChainConfig): WhiteChainClient {
   const transport = config.transport ?? defaultTransport
   const publicClient =
     config.clients?.publicClient ??

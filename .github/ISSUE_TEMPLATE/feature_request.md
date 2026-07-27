@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest a new feature for GrantChain SDK
+about: Suggest a new feature for WhiteChain SDK
 title: '[FEATURE] '
 labels: feature, enhancement
 assignees: ''

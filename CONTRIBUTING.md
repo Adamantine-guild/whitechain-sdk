@@ -1,6 +1,6 @@
-# Contributing to GrantChain SDK
+# Contributing to WhiteChain SDK
 
-Thank you for your interest in contributing to GrantChain SDK! This document guides you through the contribution process.
+Thank you for your interest in contributing to WhiteChain SDK! This document guides you through the contribution process.
 
 ## GrantFox Contribution Workflow
 
