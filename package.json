@@ -4,22 +4,32 @@
   "private": false,
   "description": "Minimal TypeScript SDK for WhiteChain using viem",
   "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "sideEffects": false,
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./utils": {
+      "types": "./dist/esm/utils/index.d.ts",
+      "import": "./dist/esm/utils/index.js",
+      "require": "./dist/cjs/utils/index.js"
+    },
+    "./providers": {
+      "types": "./dist/esm/providers/index.d.ts",
+      "import": "./dist/esm/providers/index.js",
+      "require": "./dist/cjs/providers/index.js"
     }
   },
   "files": [
     "dist"
   ],
-  "sideEffects": false,
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && node -e \"fs.mkdirSync('dist/esm', {recursive: true}); fs.writeFileSync('dist/esm/package.json', '{\\\"type\\\": \\\"module\\\"}')\" && node -e \"fs.mkdirSync('dist/cjs', {recursive: true}); fs.writeFileSync('dist/cjs/package.json', '{\\\"type\\\": \\\"commonjs\\\"}')\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "docs": "typedoc"
@@ -35,6 +45,7 @@
     "viem": "^2.8.0"
   },
   "devDependencies": {
+    "@types/node": "^26.1.1",
     "@vitest/coverage-v8": "^1.6.1",
     "typedoc": "^0.28.20",
     "typescript": "^5.4.0",
