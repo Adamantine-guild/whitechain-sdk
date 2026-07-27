@@ -28,6 +28,7 @@
       "types": "./dist/esm/wallet/index.d.ts",
       "import": "./dist/esm/wallet/index.js",
       "require": "./dist/cjs/wallet/index.js"
+    },
     "./crypto": {
       "types": "./dist/esm/crypto/index.d.ts",
       "import": "./dist/esm/crypto/index.js",
