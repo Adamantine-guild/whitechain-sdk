@@ -23,6 +23,11 @@
       "types": "./dist/esm/providers/index.d.ts",
       "import": "./dist/esm/providers/index.js",
       "require": "./dist/cjs/providers/index.js"
+    },
+    "./wallet": {
+      "types": "./dist/esm/wallet/index.d.ts",
+      "import": "./dist/esm/wallet/index.js",
+      "require": "./dist/cjs/wallet/index.js"
     }
   },
   "files": [

@@ -40,5 +40,13 @@ export {
   type IpcProviderOptions,
 } from './providers/IpcProvider.js'
 
-export { Contract, type ContractClient } from './core/Contract.js'
+export {
+  RpcProvider,
+  createRpcProvider,
+  type RpcProviderOptions,
+} from './providers/RpcProvider.js'
 
+export type { RpcProviderConfig } from './types/config.js'
+
+export { Contract, type ContractClient } from './core/Contract.js'
+export { HDWallet, createHDWallet, type HDWalletOptions } from './wallet/HDWallet.js'
