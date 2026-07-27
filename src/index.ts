@@ -44,3 +44,11 @@ export {
   MockProvider,
   returns,
 } from './testing/MockProvider.js'
+  sign,
+  verify,
+  recoverPublicKey,
+  getPublicKey,
+  getActiveBackendName,
+  type Signature,
+  type SignerBackend,
+} from './crypto/index.js'

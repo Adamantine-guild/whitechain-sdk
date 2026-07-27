@@ -60,6 +60,20 @@ await client.submitApplication({
 - `getGrantApplication`
 - `getMilestones`
 
+## 🔐 Crypto (secp256k1)
+
+`whitechain-sdk/crypto` exposes low-level secp256k1 signing, verification, and public-key recovery, backed by a WebAssembly implementation (`tiny-secp256k1`) with an automatic, transparent fallback to a pure-JavaScript implementation (`@noble/curves`) in environments where WASM can't be loaded. The active backend is chosen lazily on first use and cached for the life of the process.
+
+```ts
+import { sign, verify, getPublicKey } from 'whitechain-sdk/crypto'
+
+const publicKey = await getPublicKey(privateKey)
+const signature = await sign(messageHash, privateKey) // { r, s, recovery }
+const isValid = await verify(messageHash, signature, publicKey)
+```
+
+Both backends produce identical, low-S-normalized, RFC6979-deterministic output for the same input — the WASM path is purely a performance optimization, never a behavioral change.
+
 ## 🏗️ Design Philosophy
 
 **Omitted By Design** to keep the SDK fast and secure:
@@ -81,6 +95,7 @@ Available scripts for local development:
 - `npm run build` – Typecheck and emit ESM to `dist/`
 - `npm run typecheck` – Typecheck only
 - `npm run test` – Run unit tests via Vitest
+- `npm run bench` – Benchmark the WASM vs JS secp256k1 signer (requires `npm run build` first)
 
 ## 🤝 Contributing
 
