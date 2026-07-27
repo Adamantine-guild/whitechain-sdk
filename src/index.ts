@@ -9,6 +9,7 @@ export type {
   WhiteChainConfig,
   WhiteChainAddresses,
   WhiteChainAbis,
+  ClientDeps,
   ApplicationId,
   MilestoneId,
   GrantId,

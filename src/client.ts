@@ -19,21 +19,91 @@ const ensure = <T>(value: T | undefined, message: string): T => {
   return value
 }
 
+/**
+ * A configured client for reading and writing to WhiteChain's grant round
+ * contract. Construct one with {@link createWhiteChainClient}.
+ */
 export type WhiteChainClient = ClientDeps & {
+  /** Contract addresses this client was configured with. */
   addresses: { grant: Address }
+  /** Contract ABIs this client was configured with. */
   abis: { grant?: Abi }
+
+  /**
+   * Submits a new grant application on behalf of `applicant`.
+   * @throws {WhiteChainError} if the client has no signing account, or no `abis.grant` was provided.
+   * @returns The transaction hash.
+   */
   submitApplication(params: SubmitApplicationParams): Promise<Hash>
+
+  /**
+   * Approves a pending grant application.
+   * @throws {WhiteChainError} if the client has no signing account, or no `abis.grant` was provided.
+   * @returns The transaction hash.
+   */
   approveApplication(params: ApproveApplicationParams): Promise<Hash>
+
+  /**
+   * Submits evidence for a milestone.
+   * @throws {WhiteChainError} if the client has no signing account, or no `abis.grant` was provided.
+   * @returns The transaction hash.
+   */
   submitMilestoneEvidence(params: SubmitMilestoneEvidenceParams): Promise<Hash>
+
+  /**
+   * Approves previously submitted milestone evidence.
+   * @throws {WhiteChainError} if the client has no signing account, or no `abis.grant` was provided.
+   * @returns The transaction hash.
+   */
   approveMilestone(params: ApproveMilestoneParams): Promise<Hash>
+
+  /**
+   * Releases the payout for an approved milestone to its grantee.
+   * @throws {WhiteChainError} if the client has no signing account, or no `abis.grant` was provided.
+   * @returns The transaction hash.
+   */
   releasePayout(params: ReleasePayoutParams): Promise<Hash>
+
+  /**
+   * Reads a grant round's current status and application count.
+   * @throws {WhiteChainError} if no `abis.grant` was provided.
+   */
   getGrantRound(grantId: bigint): Promise<GrantRound>
+
+  /**
+   * Reads a grant application's current state.
+   * @throws {WhiteChainError} if no `abis.grant` was provided.
+   */
   getGrantApplication(applicationId: bigint): Promise<GrantApplication>
+
+  /**
+   * Reads all milestones defined for a grant application.
+   * @throws {WhiteChainError} if no `abis.grant` was provided.
+   */
   getMilestones(applicationId: bigint): Promise<Milestone[]>
 }
 
 const defaultTransport = http()
 
+/**
+ * Builds a {@link WhiteChainClient} for reading and writing to WhiteChain's
+ * grant round contract.
+ *
+ * Pass an `account` in `config` to enable write methods (submitting
+ * applications, approving, releasing payouts); omit it to get a read-only
+ * client — calling a write method on it throws a {@link WhiteChainError}.
+ *
+ * @example
+ * ```ts
+ * const client = createWhiteChainClient({
+ *   chain: mainnet,
+ *   transport: http(),
+ *   addresses: { grant: '0x...' },
+ *   abis: { grant: grantAbi },
+ * })
+ * const round = await client.getGrantRound(1n)
+ * ```
+ */
 export function createWhiteChainClient(config: WhiteChainConfig): WhiteChainClient {
   const transport =
     config.transport ??
