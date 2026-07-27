@@ -111,20 +111,6 @@ const defaultTransport = http()
 export function createWhiteChainClient(config: WhiteChainConfig & { provider?: any }): WhiteChainClient {
   const network = config.network
   const blockExplorerUrl = config.blockExplorerUrl ?? network?.blockExplorerUrl
-export function createWhiteChainClient(config: WhiteChainConfig): WhiteChainClient {
-  const transport =
-    config.transport ??
-    (network
-      ? http(network.rpcUrl)
-      : config.provider
-      ? (config.provider instanceof Eip1193Provider
-          ? config.provider
-          : new Eip1193Provider(config.provider)
-        ).toTransport()
-      : defaultTransport)
-export function createWhiteChainClient(config: WhiteChainConfig & { provider?: any }): WhiteChainClient {
-  const network = config.network
-  const blockExplorerUrl = config.blockExplorerUrl ?? network?.blockExplorerUrl
   const transport =
     config.transport ??
     (network
@@ -163,8 +149,6 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
     async submitApplication({ grantId, applicant, metadataUri }) {
       const wc = requireWallet()
       const abi = requireGrantAbi()
-      return wc.writeContract({
-        chain: config.chain as any,
       return (wc as any).writeContract({
         address: addresses.grant,
         abi,
@@ -176,8 +160,6 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
     async approveApplication({ applicationId }) {
       const wc = requireWallet()
       const abi = requireGrantAbi()
-      return wc.writeContract({
-        chain: config.chain as any,
       return (wc as any).writeContract({
         address: addresses.grant,
         abi,
@@ -189,8 +171,6 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
     async submitMilestoneEvidence({ milestoneId, evidenceUri }) {
       const wc = requireWallet()
       const abi = requireGrantAbi()
-      return wc.writeContract({
-        chain: config.chain as any,
       return (wc as any).writeContract({
         address: addresses.grant,
         abi,
@@ -202,8 +182,6 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
     async approveMilestone({ milestoneId }) {
       const wc = requireWallet()
       const abi = requireGrantAbi()
-      return wc.writeContract({
-        chain: config.chain as any,
       return (wc as any).writeContract({
         address: addresses.grant,
         abi,
@@ -215,8 +193,6 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
     async releasePayout({ milestoneId }) {
       const wc = requireWallet()
       const abi = requireGrantAbi()
-      return wc.writeContract({
-        chain: config.chain as any,
       return (wc as any).writeContract({
         address: addresses.grant,
         abi,
@@ -227,24 +203,24 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
 
     async getGrantRound(grantId) {
       const abi = requireGrantAbi()
-      const [status, applicationsCount] = await (publicClient as any).readContract({
+      const [status, applicationsCount] = (await (publicClient as any).readContract({
         address: addresses.grant,
         abi,
         functionName: 'getGrantRound',
         args: [grantId],
-      }) as readonly [number, bigint]
+      })) as readonly [number, bigint]
       const statusMap: Record<number, GrantRound['status']> = { 0: 'open', 1: 'closed', 2: 'archived' }
       return { id: grantId, status: statusMap[status] ?? 'open', applicationsCount }
     },
 
     async getGrantApplication(applicationId) {
       const abi = requireGrantAbi()
-      const [applicant, status, metadataUri] = await (publicClient as any).readContract({
+      const [applicant, status, metadataUri] = (await (publicClient as any).readContract({
         address: addresses.grant,
         abi,
         functionName: 'getGrantApplication',
         args: [applicationId],
-      }) as readonly [Address, number, string]
+      })) as readonly [Address, number, string]
       const statusMap: Record<number, 'submitted' | 'approved' | 'rejected'> = {
         0: 'submitted',
         1: 'approved',
@@ -255,13 +231,12 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
 
     async getMilestones(applicationId) {
       const abi = requireGrantAbi()
-      const raw = await (publicClient as any).readContract({
+      const raw = (await (publicClient as any).readContract({
         address: addresses.grant,
         abi,
         functionName: 'getMilestones',
         args: [applicationId],
-      }) as ReadonlyArray<readonly [bigint, number, string]>
-      }) as unknown as Array<readonly [bigint, number, string]>
+      })) as unknown as Array<readonly [bigint, number, string]>
 
       const statusMap: Record<number, Milestone['status']> = {
         0: 'pending',
