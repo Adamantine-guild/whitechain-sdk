@@ -1,4 +1,5 @@
 import type { Abi, Address, Chain, Transport, PublicClient, WalletClient, Account } from 'viem'
+import type { EIP1193Provider, Eip1193Provider } from './providers/BrowserProvider.js'
 
 /** Contract addresses the client needs to know about. */
 export type WhiteChainAddresses = {
@@ -33,12 +34,15 @@ export type WhiteChainAbis = {
 export type WhiteChainConfig = {
   /** The viem `Chain` the client talks to. */
   chain: Chain
+  transport?: Transport
+  provider?: EIP1193Provider | Eip1193Provider
   /** The viem `Transport` (e.g. `http()`) used for both clients. */
   transport: Transport
   /** Contract addresses referenced by client methods. */
   addresses: WhiteChainAddresses
   /** Contract ABIs referenced by client methods. */
   abis?: WhiteChainAbis
+  account?: Account | Address
   /**
    * The signing account for write methods (`submitApplication`,
    * `approveApplication`, etc.). Leave unset to construct a read-only
