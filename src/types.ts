@@ -41,23 +41,18 @@ export type WhiteChainConfig = {
   transport?: Transport
   /** Standard block explorer URL for transaction lookup. */
   blockExplorerUrl?: string
-  /** The viem `Chain` the client talks to. */
-  chain: Chain
-  transport?: Transport
-  provider?: EIP1193Provider | Eip1193Provider
-  /** The viem `Transport` (e.g. `http()`) used for both clients. */
-  transport: Transport
+  /** EIP-1193 provider (e.g. window.ethereum). */
+  provider?: any
   /** Contract addresses referenced by client methods. */
   addresses: WhiteChainAddresses
   /** Contract ABIs referenced by client methods. */
   abis?: WhiteChainAbis
-  account?: Account | Address
   /**
    * The signing account for write methods (`submitApplication`,
    * `approveApplication`, etc.). Leave unset to construct a read-only
    * client — write methods will throw a {@link WhiteChainError} if called.
    */
-  account?: Account
+  account?: Account | Address
   /**
    * Pre-built viem clients to reuse instead of constructing new ones from
    * `chain`/`transport`/`account`. Useful for sharing a client instance
