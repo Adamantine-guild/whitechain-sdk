@@ -25,3 +25,12 @@ export type {
 } from './types.js'
 
 export { WhiteChainError, TODO } from './types.js'
+
+export {
+  Eip1193Provider,
+  BrowserProvider,
+  createBrowserClient,
+  type EIP1193Provider,
+} from './providers/BrowserProvider.js'
+
+
