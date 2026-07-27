@@ -11,12 +11,13 @@ import {
   GrantApplication,
   Milestone,
 } from './types.js'
-import { WhiteChainError } from './types.js'
+import { WhiteChainError, ValidationError } from './errors/index.js'
 import type { NetworkProfile } from './config/networks.js'
 import { Eip1193Provider } from './providers/BrowserProvider.js'
+import { withGasEstimation, type WithGasEstimation } from './core/TransactionHelper.js'
 
 const ensure = <T>(value: T | undefined, message: string): T => {
-  if (value === undefined || value === null) throw new WhiteChainError(message)
+  if (value === undefined || value === null) throw new ValidationError(message)
   return value
 }
 
@@ -39,35 +40,35 @@ export type WhiteChainClient = ClientDeps & {
    * @throws {WhiteChainError} if the client has no signing account, or no `abis.grant` was provided.
    * @returns The transaction hash.
    */
-  submitApplication(params: SubmitApplicationParams): Promise<Hash>
+  submitApplication: WithGasEstimation<SubmitApplicationParams>
 
   /**
    * Approves a pending grant application.
    * @throws {WhiteChainError} if the client has no signing account, or no `abis.grant` was provided.
    * @returns The transaction hash.
    */
-  approveApplication(params: ApproveApplicationParams): Promise<Hash>
+  approveApplication: WithGasEstimation<ApproveApplicationParams>
 
   /**
    * Submits evidence for a milestone.
    * @throws {WhiteChainError} if the client has no signing account, or no `abis.grant` was provided.
    * @returns The transaction hash.
    */
-  submitMilestoneEvidence(params: SubmitMilestoneEvidenceParams): Promise<Hash>
+  submitMilestoneEvidence: WithGasEstimation<SubmitMilestoneEvidenceParams>
 
   /**
    * Approves previously submitted milestone evidence.
    * @throws {WhiteChainError} if the client has no signing account, or no `abis.grant` was provided.
    * @returns The transaction hash.
    */
-  approveMilestone(params: ApproveMilestoneParams): Promise<Hash>
+  approveMilestone: WithGasEstimation<ApproveMilestoneParams>
 
   /**
    * Releases the payout for an approved milestone to its grantee.
    * @throws {WhiteChainError} if the client has no signing account, or no `abis.grant` was provided.
    * @returns The transaction hash.
    */
-  releasePayout(params: ReleasePayoutParams): Promise<Hash>
+  releasePayout: WithGasEstimation<ReleasePayoutParams>
 
   /**
    * Reads a grant round's current status and application count.
@@ -111,20 +112,6 @@ const defaultTransport = http()
 export function createWhiteChainClient(config: WhiteChainConfig & { provider?: any }): WhiteChainClient {
   const network = config.network
   const blockExplorerUrl = config.blockExplorerUrl ?? network?.blockExplorerUrl
-export function createWhiteChainClient(config: WhiteChainConfig): WhiteChainClient {
-  const transport =
-    config.transport ??
-    (network
-      ? http(network.rpcUrl)
-      : config.provider
-      ? (config.provider instanceof Eip1193Provider
-          ? config.provider
-          : new Eip1193Provider(config.provider)
-        ).toTransport()
-      : defaultTransport)
-export function createWhiteChainClient(config: WhiteChainConfig & { provider?: any }): WhiteChainClient {
-  const network = config.network
-  const blockExplorerUrl = config.blockExplorerUrl ?? network?.blockExplorerUrl
   const transport =
     config.transport ??
     (network
@@ -163,67 +150,146 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
     async submitApplication({ grantId, applicant, metadataUri }) {
       const wc = requireWallet()
       const abi = requireGrantAbi()
-      return wc.writeContract({
-        chain: config.chain as any,
       return (wc as any).writeContract({
         address: addresses.grant,
         abi,
         functionName: 'submitApplication',
         args: [grantId, applicant, metadataUri],
-      })
+      } as any)
     },
 
     async approveApplication({ applicationId }) {
       const wc = requireWallet()
       const abi = requireGrantAbi()
-      return wc.writeContract({
-        chain: config.chain as any,
       return (wc as any).writeContract({
         address: addresses.grant,
         abi,
         functionName: 'approveApplication',
         args: [applicationId],
-      })
+      } as any)
     },
 
     async submitMilestoneEvidence({ milestoneId, evidenceUri }) {
       const wc = requireWallet()
       const abi = requireGrantAbi()
-      return wc.writeContract({
-        chain: config.chain as any,
       return (wc as any).writeContract({
         address: addresses.grant,
         abi,
         functionName: 'submitMilestoneEvidence',
         args: [milestoneId, evidenceUri],
-      })
+      } as any)
     },
 
     async approveMilestone({ milestoneId }) {
       const wc = requireWallet()
       const abi = requireGrantAbi()
-      return wc.writeContract({
-        chain: config.chain as any,
       return (wc as any).writeContract({
         address: addresses.grant,
         abi,
         functionName: 'approveMilestone',
         args: [milestoneId],
-      })
+      } as any)
     },
 
     async releasePayout({ milestoneId }) {
       const wc = requireWallet()
       const abi = requireGrantAbi()
-      return wc.writeContract({
-        chain: config.chain as any,
       return (wc as any).writeContract({
         address: addresses.grant,
         abi,
         functionName: 'releasePayout',
         args: [milestoneId],
-      })
+      } as any)
     },
+    submitApplication: withGasEstimation(
+      async ({ grantId, applicant, metadataUri }) => {
+        const wc = requireWallet()
+        const abi = requireGrantAbi()
+        return (wc as any).writeContract({
+          address: addresses.grant,
+          abi,
+          functionName: 'submitApplication',
+          args: [grantId, applicant, metadataUri],
+        } as any)
+      },
+      publicClient,
+      addresses.grant,
+      abis.grant as Abi,
+      'submitApplication',
+      (params) => [params.grantId, params.applicant, params.metadataUri]
+    ),
+
+    approveApplication: withGasEstimation(
+      async ({ applicationId }) => {
+        const wc = requireWallet()
+        const abi = requireGrantAbi()
+        return (wc as any).writeContract({
+          address: addresses.grant,
+          abi,
+          functionName: 'approveApplication',
+          args: [applicationId],
+        } as any)
+      },
+      publicClient,
+      addresses.grant,
+      abis.grant as Abi,
+      'approveApplication',
+      (params) => [params.applicationId]
+    ),
+
+    submitMilestoneEvidence: withGasEstimation(
+      async ({ milestoneId, evidenceUri }) => {
+        const wc = requireWallet()
+        const abi = requireGrantAbi()
+        return (wc as any).writeContract({
+          address: addresses.grant,
+          abi,
+          functionName: 'submitMilestoneEvidence',
+          args: [milestoneId, evidenceUri],
+        } as any)
+      },
+      publicClient,
+      addresses.grant,
+      abis.grant as Abi,
+      'submitMilestoneEvidence',
+      (params) => [params.milestoneId, params.evidenceUri]
+    ),
+
+    approveMilestone: withGasEstimation(
+      async ({ milestoneId }) => {
+        const wc = requireWallet()
+        const abi = requireGrantAbi()
+        return (wc as any).writeContract({
+          address: addresses.grant,
+          abi,
+          functionName: 'approveMilestone',
+          args: [milestoneId],
+        } as any)
+      },
+      publicClient,
+      addresses.grant,
+      abis.grant as Abi,
+      'approveMilestone',
+      (params) => [params.milestoneId]
+    ),
+
+    releasePayout: withGasEstimation(
+      async ({ milestoneId }) => {
+        const wc = requireWallet()
+        const abi = requireGrantAbi()
+        return (wc as any).writeContract({
+          address: addresses.grant,
+          abi,
+          functionName: 'releasePayout',
+          args: [milestoneId],
+        } as any)
+      },
+      publicClient,
+      addresses.grant,
+      abis.grant as Abi,
+      'releasePayout',
+      (params) => [params.milestoneId]
+    ),
 
     async getGrantRound(grantId) {
       const abi = requireGrantAbi()
@@ -260,7 +326,6 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
         abi,
         functionName: 'getMilestones',
         args: [applicationId],
-      }) as ReadonlyArray<readonly [bigint, number, string]>
       }) as unknown as Array<readonly [bigint, number, string]>
 
       const statusMap: Record<number, Milestone['status']> = {
