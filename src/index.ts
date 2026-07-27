@@ -39,3 +39,13 @@ export {
   IpcProvider,
   type IpcProviderOptions,
 } from './providers/IpcProvider.js'
+
+export {
+  sign,
+  verify,
+  recoverPublicKey,
+  getPublicKey,
+  getActiveBackendName,
+  type Signature,
+  type SignerBackend,
+} from './crypto/index.js'
