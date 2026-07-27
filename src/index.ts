@@ -9,6 +9,7 @@ export * from './config/networks.js'
 export * from './network/provider.js'
 export * from './network/BatchProvider.js'
 export { Contract } from './core/Contract.js'
+export * from './core/TransactionHelper.js'
 export { AbiCache, abiCache } from './core/AbiCache.js'
 
 export type {
@@ -50,6 +51,7 @@ export {
   MockProvider,
   returns,
 } from './testing/MockProvider.js'
+export {
   sign,
   verify,
   recoverPublicKey,
