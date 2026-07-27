@@ -39,3 +39,6 @@ export {
   IpcProvider,
   type IpcProviderOptions,
 } from './providers/IpcProvider.js'
+
+export { Contract, type ContractClient } from './core/Contract.js'
+
