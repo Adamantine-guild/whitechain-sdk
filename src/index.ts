@@ -41,6 +41,9 @@ export {
 } from './providers/IpcProvider.js'
 
 export {
+  MockProvider,
+  returns,
+} from './testing/MockProvider.js'
   sign,
   verify,
   recoverPublicKey,
