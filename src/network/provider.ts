@@ -22,10 +22,10 @@ export class Provider {
     this.rpcUrl = network.rpcUrl
     this.blockExplorerUrl = network.blockExplorerUrl
     
-    // Use a custom fetch to intercept 429 rate limits and emit an event
+    // Use a custom fetchFn to intercept 429 rate limits and emit an event
     this.transport = http(network.rpcUrl, {
       fetchOptions: {},
-      fetch: async (url, init) => {
+      fetchFn: async (url: string | URL | Request, init?: RequestInit) => {
         const response = await fetch(url, init)
         if (response.status === 429) {
           this.emit('rateLimit')
