@@ -39,3 +39,8 @@ export {
   IpcProvider,
   type IpcProviderOptions,
 } from './providers/IpcProvider.js'
+
+export {
+  MockProvider,
+  returns,
+} from './testing/MockProvider.js'
