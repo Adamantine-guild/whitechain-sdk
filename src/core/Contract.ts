@@ -1,5 +1,6 @@
 import type { Address, PublicClient, WalletClient, Hash } from 'viem'
 import type { Abi, ExtractAbiFunctionNames, ExtractAbiFunction, AbiParametersToPrimitiveTypes, AbiStateMutability } from 'abitype'
+import { ValidationError } from '../errors/index.js'
 
 type Prettify<T> = {
   [K in keyof T]: T[K]
@@ -54,7 +55,7 @@ export class Contract<
     ...args: TArgs extends undefined ? [] : [args: TArgs]
   ): Promise<ExtractReturnType<TAbi extends Abi ? TAbi : Abi, TFunctionName, 'pure' | 'view'>> {
     if (!this.publicClient) {
-      throw new Error('PublicClient is not initialized for read operations')
+      throw new ValidationError('PublicClient is not initialized for read operations')
     }
 
     const _args = args.length > 0 ? (args[0] as unknown[]) : []
@@ -78,7 +79,7 @@ export class Contract<
     ...args: TArgs extends undefined ? [] : [args: TArgs]
   ): Promise<Hash> {
     if (!this.walletClient) {
-      throw new Error('WalletClient is not initialized for write operations')
+      throw new ValidationError('WalletClient is not initialized for write operations')
     }
 
     const _args = args.length > 0 ? (args[0] as unknown[]) : []
