@@ -3,6 +3,7 @@ export {
   type WhiteChainClient,
 } from './client.js'
 export { formatUnits, parseUnits } from './utils/math.js'
+export * from './constants.js'
 
 export type {
   WhiteChainConfig,
