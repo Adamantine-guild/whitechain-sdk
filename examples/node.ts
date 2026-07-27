@@ -23,5 +23,9 @@ async function main() {
 
 main().catch((e) => {
   console.error(e)
+  const proc = (globalThis as any).process
+  if (proc && proc.exit) {
+    proc.exit(1)
+  }
 })
 
