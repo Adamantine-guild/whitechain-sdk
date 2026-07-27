@@ -7,6 +7,7 @@ export * from './constants.js'
 export * from './config/networks.js'
 export * from './network/provider.js'
 export * from './network/BatchProvider.js'
+export { Contract } from './core/Contract.js'
 
 export type {
   WhiteChainConfig,

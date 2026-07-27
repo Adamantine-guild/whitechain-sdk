@@ -42,6 +42,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "abitype": "^1.3.0",
     "viem": "^2.8.0"
   },
   "devDependencies": {
