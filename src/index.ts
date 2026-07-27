@@ -33,4 +33,12 @@ export {
   type EIP1193Provider,
 } from './providers/BrowserProvider.js'
 
+export {
+  NonceManager,
+  createNonceManager,
+  type NonceManagerOptions,
+  type GetOnChainNonceFn,
+} from './wallet/index.js'
+
+
 
