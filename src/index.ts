@@ -8,7 +8,6 @@ export * from './constants.js'
 export * from './config/networks.js'
 export * from './network/provider.js'
 export * from './network/BatchProvider.js'
-export { Contract } from './core/Contract.js'
 export * from './core/TransactionHelper.js'
 export { AbiCache, abiCache } from './core/AbiCache.js'
 
@@ -61,3 +60,20 @@ export {
   type Signature,
   type SignerBackend,
 } from './crypto/index.js'
+
+// ---------------------------------------------------------------------------
+// Plugin system
+// ---------------------------------------------------------------------------
+
+export {
+  WhitechainSDK,
+  type WhitechainSDKConfig,
+  type WhitechainSDKPlugins,
+} from './core/WhitechainSDK.js'
+
+export type {
+  ISDKPlugin,
+  SDKContext,
+  SDKLogger,
+  PluginMeta,
+} from './interfaces/ISDKPlugin.js'

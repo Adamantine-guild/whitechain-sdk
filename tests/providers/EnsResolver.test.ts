@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { EnsResolver } from '../../src/providers/EnsResolver.js';
+import { EnsResolver, type RpcFetchFn } from '../../src/providers/EnsResolver.js';
 import { encodeFunctionResult } from 'viem';
 
 const universalResolverAbi = [
@@ -18,11 +18,11 @@ const universalResolverAbi = [
 ] as const;
 
 describe('EnsResolver', () => {
-  let fetchFn: ReturnType<typeof vi.fn>;
+  let fetchFn: RpcFetchFn;
   let resolver: EnsResolver;
 
   beforeEach(() => {
-    fetchFn = vi.fn();
+    fetchFn = vi.fn() as unknown as RpcFetchFn;
     resolver = new EnsResolver(fetchFn);
   });
 
@@ -33,7 +33,7 @@ describe('EnsResolver', () => {
       functionName: 'reverse',
       result: ['vitalik.eth', '0x0000000000000000000000000000000000000000', '0x0000000000000000000000000000000000000000', '0x0000000000000000000000000000000000000000'],
     });
-    fetchFn.mockResolvedValue(mockResponse);
+    (fetchFn as any).mockResolvedValue(mockResponse);
 
     const name = await resolver.lookupAddress('0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045');
     
@@ -41,7 +41,7 @@ describe('EnsResolver', () => {
     expect(fetchFn).toHaveBeenCalledTimes(1);
     
     // Verify it passes the correct format to eth_call
-    const callArgs = fetchFn.mock.calls[0];
+    const callArgs = (fetchFn as any).mock.calls[0];
     expect(callArgs[0]).toBe('eth_call');
     expect(callArgs[1][0].to).toBe('0xc0497E381f536Be9ce14B0dD3817cBcAe57d2F62');
   });
@@ -52,14 +52,14 @@ describe('EnsResolver', () => {
       functionName: 'reverse',
       result: ['', '0x0000000000000000000000000000000000000000', '0x0000000000000000000000000000000000000000', '0x0000000000000000000000000000000000000000'],
     });
-    fetchFn.mockResolvedValue(mockResponse);
+    (fetchFn as any).mockResolvedValue(mockResponse);
 
     const name = await resolver.lookupAddress('0x0000000000000000000000000000000000000000');
     expect(name).toBeNull();
   });
 
   it('returns null and caches it if the contract reverts or returns 0x', async () => {
-    fetchFn.mockResolvedValue('0x'); // Common response for empty contract/revert in some nodes
+    (fetchFn as any).mockResolvedValue('0x'); // Common response for empty contract/revert in some nodes
 
     const name = await resolver.lookupAddress('0xabc0000000000000000000000000000000000000');
     expect(name).toBeNull();
@@ -71,7 +71,7 @@ describe('EnsResolver', () => {
       functionName: 'reverse',
       result: ['nick.eth', '0x0000000000000000000000000000000000000000', '0x0000000000000000000000000000000000000000', '0x0000000000000000000000000000000000000000'],
     });
-    fetchFn.mockResolvedValue(mockResponse);
+    (fetchFn as any).mockResolvedValue(mockResponse);
 
     // Call 1
     const name1 = await resolver.lookupAddress('0x1230000000000000000000000000000000000000');

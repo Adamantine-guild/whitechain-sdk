@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { IPFSClient } from '../../src/storage/IPFSClient'
-import type { IPFSAdapter } from '../../src/storage/adapters/types'
+import { IPFSClient } from '../../src/storage/IPFSClient.js'
+import type { IPFSAdapter } from '../../src/storage/adapters/types.js'
 
 const mockAdapter: IPFSAdapter = {
   uploadJSON: vi.fn().mockResolvedValue('ipfs://QmJSON'),
