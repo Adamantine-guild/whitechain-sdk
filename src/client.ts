@@ -108,11 +108,19 @@ const defaultTransport = http()
  * const round = await client.getGrantRound(1n)
  * ```
  */
+export function createWhiteChainClient(config: WhiteChainConfig & { provider?: any }): WhiteChainClient {
+  const network = config.network
+  const blockExplorerUrl = config.blockExplorerUrl ?? network?.blockExplorerUrl
 export function createWhiteChainClient(config: WhiteChainConfig): WhiteChainClient {
   const transport =
     config.transport ??
-    (config.provider
-      ? (config.provider instanceof Eip1193Provider ? config.provider : new Eip1193Provider(config.provider)).toTransport()
+    (network
+      ? http(network.rpcUrl)
+      : config.provider
+      ? (config.provider instanceof Eip1193Provider
+          ? config.provider
+          : new Eip1193Provider(config.provider)
+        ).toTransport()
       : defaultTransport)
 export function createWhiteChainClient(config: WhiteChainConfig & { provider?: any }): WhiteChainClient {
   const network = config.network
@@ -162,7 +170,7 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
         abi,
         functionName: 'submitApplication',
         args: [grantId, applicant, metadataUri],
-      } as any)
+      })
     },
 
     async approveApplication({ applicationId }) {
@@ -175,7 +183,7 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
         abi,
         functionName: 'approveApplication',
         args: [applicationId],
-      } as any)
+      })
     },
 
     async submitMilestoneEvidence({ milestoneId, evidenceUri }) {
@@ -188,7 +196,7 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
         abi,
         functionName: 'submitMilestoneEvidence',
         args: [milestoneId, evidenceUri],
-      } as any)
+      })
     },
 
     async approveMilestone({ milestoneId }) {
@@ -201,7 +209,7 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
         abi,
         functionName: 'approveMilestone',
         args: [milestoneId],
-      } as any)
+      })
     },
 
     async releasePayout({ milestoneId }) {
@@ -214,7 +222,7 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
         abi,
         functionName: 'releasePayout',
         args: [milestoneId],
-      } as any)
+      })
     },
 
     async getGrantRound(grantId) {

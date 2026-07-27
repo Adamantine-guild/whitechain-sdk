@@ -5,6 +5,8 @@ export {
 export { formatUnits, parseUnits } from './utils/math.js'
 export * from './constants.js'
 export * from './config/networks.js'
+export * from './network/provider.js'
+export * from './network/BatchProvider.js'
 
 export type {
   WhiteChainConfig,
@@ -33,4 +35,7 @@ export {
   type EIP1193Provider,
 } from './providers/BrowserProvider.js'
 
-
+export {
+  IpcProvider,
+  type IpcProviderOptions,
+} from './providers/IpcProvider.js'
