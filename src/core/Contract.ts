@@ -56,6 +56,7 @@ export class Contract<
   ): Promise<ExtractReturnType<TAbi extends Abi ? TAbi : Abi, TFunctionName, 'pure' | 'view'>> {
     if (!this.publicClient) {
       throw new ValidationError('PublicClient is not initialized for read operations')
+      throw new Error('PublicClient is not initialized for read operations')
     }
 
     const _args = args.length > 0 ? (args[0] as unknown[]) : []
@@ -80,6 +81,7 @@ export class Contract<
   ): Promise<Hash> {
     if (!this.walletClient) {
       throw new ValidationError('WalletClient is not initialized for write operations')
+      throw new Error('WalletClient is not initialized for write operations')
     }
 
     const _args = args.length > 0 ? (args[0] as unknown[]) : []
