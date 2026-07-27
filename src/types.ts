@@ -33,6 +33,12 @@ import type { NetworkProfile } from './config/networks.js'
  * ```
  */
 export type WhiteChainConfig = {
+  /** The viem `Chain` the client talks to. */
+  chain: Chain
+  /** The viem `Transport` (e.g. `http()`) used for both clients. */
+  transport?: Transport
+  /** An EIP-1193 provider (e.g. `window.ethereum`). */
+  provider?: EIP1193Provider | Eip1193Provider
   /** The viem `Chain` the client talks to (optional if `network` is specified). */
   chain?: Chain
   /** Pre-defined network profile (e.g. `networks.sepolia`, `networks.mainnet`). */
