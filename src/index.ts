@@ -1,7 +1,8 @@
 export {
   createWhiteChainClient,
   type WhiteChainClient,
-} from './client'
+} from './client.js'
+export { formatUnits, parseUnits } from './utils/math.js'
 
 export type {
   WhiteChainConfig,
@@ -18,7 +19,7 @@ export type {
   GrantRound,
   GrantApplication,
   Milestone,
-} from './types'
+} from './types.js'
 
-export { WhiteChainError, TODO } from './types'
+export { WhiteChainError, TODO } from './types.js'
 
