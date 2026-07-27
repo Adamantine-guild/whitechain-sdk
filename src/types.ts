@@ -155,12 +155,7 @@ export type MinimalReadResult<T> = Promise<T>
  * Contract reverts and network/transport errors surface as their own
  * (viem-thrown) error types, not this one.
  */
-export class WhiteChainError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = 'WhiteChainError'
-  }
-}
+export { WhiteChainError } from './errors/index.js'
 
 /**
  * Placeholder messages for features this SDK does not implement yet.

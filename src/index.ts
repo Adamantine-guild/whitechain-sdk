@@ -27,7 +27,8 @@ export type {
   Milestone,
 } from './types.js'
 
-export { WhiteChainError, TODO } from './types.js'
+export { TODO } from './types.js'
+export * from './errors/index.js'
 
 export {
   Eip1193Provider,

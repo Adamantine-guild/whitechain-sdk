@@ -1,3 +1,5 @@
+import { ValidationError } from './errors/index.js'
+
 /**
  * Commonly used addresses and simple validation helpers.
  * All addresses are exported as lower‑case checksummed strings.
@@ -35,6 +37,6 @@ export function isValidAddress(address: string): boolean {
  */
 export function assertValidAddress(address: string, name = 'address'): void {
   if (!isValidAddress(address)) {
-    throw new Error(`${name} is not a valid 20‑byte hex address: ${address}`)
+    throw new ValidationError(`${name} is not a valid 20‑byte hex address: ${address}`)
   }
 }

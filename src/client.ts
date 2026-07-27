@@ -11,12 +11,12 @@ import {
   GrantApplication,
   Milestone,
 } from './types.js'
-import { WhiteChainError } from './types.js'
+import { WhiteChainError, ValidationError } from './errors/index.js'
 import type { NetworkProfile } from './config/networks.js'
 import { Eip1193Provider } from './providers/BrowserProvider.js'
 
 const ensure = <T>(value: T | undefined, message: string): T => {
-  if (value === undefined || value === null) throw new WhiteChainError(message)
+  if (value === undefined || value === null) throw new ValidationError(message)
   return value
 }
 
