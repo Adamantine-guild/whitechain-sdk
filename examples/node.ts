@@ -1,4 +1,4 @@
-import { createWhiteChainClient } from '../src'
+import { createWhiteChainClient } from '../src/index.js'
 import { http } from 'viem'
 import { mainnet } from 'viem/chains'
 import type { Abi } from 'viem'
@@ -23,6 +23,9 @@ async function main() {
 
 main().catch((e) => {
   console.error(e)
-  process.exit(1)
+  const proc = (globalThis as any).process
+  if (proc && proc.exit) {
+    proc.exit(1)
+  }
 })
 

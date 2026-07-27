@@ -16,14 +16,15 @@ export type WhiteChainAbis = {
   grant?: Abi
 }
 
+import type { NetworkProfile } from './config/networks.js'
+
 /**
  * Configuration passed to {@link createWhiteChainClient}.
  *
  * @example
  * ```ts
  * const client = createWhiteChainClient({
- *   chain: mainnet,
- *   transport: http(),
+ *   network: networks.sepolia,
  *   addresses: { grant: '0x...' },
  *   abis: { grant: grantAbi },
  *   account: myAccount, // omit for a read-only client
@@ -31,10 +32,14 @@ export type WhiteChainAbis = {
  * ```
  */
 export type WhiteChainConfig = {
-  /** The viem `Chain` the client talks to. */
-  chain: Chain
-  /** The viem `Transport` (e.g. `http()`) used for both clients. */
-  transport: Transport
+  /** The viem `Chain` the client talks to (optional if `network` is specified). */
+  chain?: Chain
+  /** Pre-defined network profile (e.g. `networks.sepolia`, `networks.mainnet`). */
+  network?: NetworkProfile
+  /** The viem `Transport` (e.g. `http()`) used for both clients. Optional if `network` is provided. */
+  transport?: Transport
+  /** Standard block explorer URL for transaction lookup. */
+  blockExplorerUrl?: string
   /** Contract addresses referenced by client methods. */
   addresses: WhiteChainAddresses
   /** Contract ABIs referenced by client methods. */
