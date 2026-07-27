@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import type { Abi, Address } from 'viem'
-import { createWhiteChainClient } from '../src'
+import { createWhiteChainClient } from '../src/index.js'
 
 const dummyAbi = [
   { type: 'function', name: 'submitApplication', stateMutability: 'nonpayable', inputs: [

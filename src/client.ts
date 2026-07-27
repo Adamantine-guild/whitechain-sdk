@@ -1,5 +1,5 @@
 import { createPublicClient, createWalletClient, http, type Address, type Abi, type Hash } from 'viem'
-import type {
+import {
   WhiteChainConfig,
   ClientDeps,
   SubmitApplicationParams,
@@ -10,8 +10,8 @@ import type {
   GrantRound,
   GrantApplication,
   Milestone,
-} from './types'
-import { WhiteChainError } from './types'
+} from './types.js'
+import { WhiteChainError } from './types.js'
 
 const ensure = <T>(value: T | undefined, message: string): T => {
   if (value === undefined || value === null) throw new WhiteChainError(message)
