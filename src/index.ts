@@ -8,6 +8,7 @@ export * from './config/networks.js'
 export * from './network/provider.js'
 export * from './network/BatchProvider.js'
 export { Contract } from './core/Contract.js'
+export { AbiCache, abiCache } from './core/AbiCache.js'
 
 export type {
   WhiteChainConfig,
