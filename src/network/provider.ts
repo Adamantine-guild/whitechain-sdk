@@ -5,16 +5,27 @@ import { ValidationError } from '../errors/index.js'
 
 type RateLimitListener = () => void
 
+export interface ProviderOptions {
+  /** Maximum number of retry attempts on HTTP 429 rate limit responses (default: 3). */
+  maxRetries?: number
+  /** Base delay in milliseconds for exponential backoff calculations (default: 100). */
+  baseDelayMs?: number
+  /** Custom fetch implementation for network requests or testing. */
+  fetchFn?: typeof fetch
+}
+
 export class Provider {
   public readonly network: NetworkProfile
   public readonly chainId: number
   public readonly rpcUrl: string
   public readonly blockExplorerUrl: string
   public readonly transport: Transport
+  public readonly maxRetries: number
+  public readonly baseDelayMs: number
 
   private _listeners: RateLimitListener[] = []
 
-  constructor(network: NetworkProfile) {
+  constructor(network: NetworkProfile, options?: ProviderOptions) {
     if (!network || typeof network.chainId !== 'number') {
       throw new ValidationError('Invalid network profile provided to Provider')
     }
@@ -22,17 +33,30 @@ export class Provider {
     this.chainId = network.chainId
     this.rpcUrl = network.rpcUrl
     this.blockExplorerUrl = network.blockExplorerUrl
-    
-    // Use a custom fetchFn to intercept 429 rate limits and emit an event
+    this.maxRetries = options?.maxRetries ?? 3
+    this.baseDelayMs = options?.baseDelayMs ?? 100
+
+    // Use a custom fetchFn to intercept 429 rate limits, emit rateLimit events, and retry with exponential backoff
     this.transport = http(network.rpcUrl, {
       fetchOptions: {},
       fetchFn: async (url: string | URL | Request, init?: RequestInit) => {
-        const response = await fetch(url, init)
-        if (response.status === 429) {
-          this.emit('rateLimit')
+        let attempt = 0
+        while (true) {
+          const fetchImpl = options?.fetchFn ?? globalThis.fetch
+          const response = await fetchImpl(url, init)
+          if (response.status === 429) {
+            this.emit('rateLimit')
+            if (attempt < this.maxRetries) {
+              const delay = Math.pow(2, attempt) * this.baseDelayMs
+              await new Promise((resolve) => setTimeout(resolve, delay))
+              attempt++
+              continue
+            }
+            throw new Error(`HTTP 429 Rate limit exceeded after ${this.maxRetries} retries`)
+          }
+          return response
         }
-        return response
-      }
+      },
     })
   }
 
@@ -60,6 +84,6 @@ export class Provider {
   }
 }
 
-export function createProvider(network: NetworkProfile): Provider {
-  return new Provider(network)
+export function createProvider(network: NetworkProfile, options?: ProviderOptions): Provider {
+  return new Provider(network, options)
 }

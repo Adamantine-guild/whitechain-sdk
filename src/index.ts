@@ -3,12 +3,14 @@ export {
   type WhiteChainClient,
 } from './client.js'
 export { formatUnits, parseUnits } from './utils/math.js'
+export { toChecksumAddress, isAddress, assertChecksumAddress } from './utils/address.js'
 export * from './constants.js'
 export * from './config/networks.js'
 export * from './network/provider.js'
 export * from './network/BatchProvider.js'
 export { Contract } from './core/Contract.js'
 export * from './core/TransactionHelper.js'
+export { AbiCache, abiCache } from './core/AbiCache.js'
 
 export type {
   WhiteChainConfig,
@@ -42,6 +44,8 @@ export {
   IpcProvider,
   type IpcProviderOptions,
 } from './providers/IpcProvider.js'
+
+export { Contract, type ContractClient } from './core/Contract.js'
 
 export {
   MockProvider,
