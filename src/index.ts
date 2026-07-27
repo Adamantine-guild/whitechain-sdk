@@ -9,6 +9,7 @@ export * from './config/networks.js'
 export * from './network/provider.js'
 export * from './network/BatchProvider.js'
 export { Contract } from './core/Contract.js'
+export * from './core/TransactionHelper.js'
 export { AbiCache, abiCache } from './core/AbiCache.js'
 
 export type {
@@ -45,7 +46,18 @@ export {
   type IpcProviderOptions,
 } from './providers/IpcProvider.js'
 
+export { Contract, type ContractClient } from './core/Contract.js'
+
 export {
   MockProvider,
   returns,
 } from './testing/MockProvider.js'
+export {
+  sign,
+  verify,
+  recoverPublicKey,
+  getPublicKey,
+  getActiveBackendName,
+  type Signature,
+  type SignerBackend,
+} from './crypto/index.js'
