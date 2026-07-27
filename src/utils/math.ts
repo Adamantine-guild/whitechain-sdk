@@ -15,13 +15,20 @@
 export function formatUnits(value: bigint, decimals: number): string {
   if (decimals < 0) throw new Error('decimals must be non‑negative')
   const raw = value.toString(10)
+  
+  const isNegative = raw.startsWith('-')
+  const absRaw = isNegative ? raw.slice(1) : raw
+
   // Ensure the string has enough digits to place the decimal point.
-  const padded = raw.padStart(decimals + 1, '0')
+  const padded = absRaw.padStart(decimals + 1, '0')
   const integerPart = padded.slice(0, -decimals) || '0'
   const fractionalPart = padded.slice(-decimals)
+  
   // Trim trailing zeros but keep at least one digit.
   const trimmedFraction = fractionalPart.replace(/0+$/g, '') || '0'
-  return `${integerPart}.${trimmedFraction}`
+  
+  const formatted = `${integerPart}.${trimmedFraction}`
+  return isNegative ? `-${formatted}` : formatted
 }
 
 /**
@@ -36,11 +43,17 @@ export function formatUnits(value: bigint, decimals: number): string {
 export function parseUnits(value: string, decimals: number): bigint {
   if (decimals < 0) throw new Error('decimals must be non‑negative')
   if (!value) throw new Error('value must be a non‑empty string')
-  const [intPart = '0', fracPart = ''] = value.split('.')
+  
+  const isNegative = value.startsWith('-')
+  const absValue = isNegative ? value.slice(1) : value
+
+  const [intPart = '0', fracPart = ''] = absValue.split('.')
   // Remove any leading zeros from integer part for consistency.
   const cleanInt = intPart.replace(/^0+(?=\d)/, '') || '0'
   // Pad or truncate the fractional part to the required decimals.
   const cleanFrac = (fracPart + '0'.repeat(decimals)).slice(0, decimals)
   const combined = cleanInt + cleanFrac
-  return BigInt(combined)
+  
+  const result = BigInt(combined)
+  return isNegative ? -result : result
 }
