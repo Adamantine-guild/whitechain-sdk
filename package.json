@@ -2,7 +2,7 @@
   "name": "whitechain-sdk",
   "version": "0.1.0",
   "private": false,
-  "description": "Minimal TypeScript SDK for WhiteChain MVP using viem",
+  "description": "Minimal TypeScript SDK for WhiteChain using viem",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -26,8 +26,7 @@
   "keywords": [
     "whitechain",
     "sdk",
-    "viem",
-    "mvp"
+    "viem"
   ],
   "author": "",
   "license": "MIT",

@@ -1,14 +1,27 @@
-# WhiteChain SDK (MVP)
+<div align="center">
+  <h1>WhiteChain SDK</h1>
+  <p>
+    <strong>A streamlined TypeScript SDK to interact with WhiteChain smart contracts.</strong>
+  </p>
+  
+  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+</div>
 
-Minimal TypeScript SDK that wraps the MVP contract actions and simple reads using viem. Keep it small, typed, and future-friendly without overengineering.
+## 🌟 Overview
 
-## Install
+The WhiteChain SDK provides a minimal, typed, and future-friendly wrapper around WhiteChain contract actions and reads. Built on top of `viem`, it's designed to be lightweight and highly extensible.
+
+## 📦 Installation
 
 ```bash
-npm i whitechain-sdk viem
+npm install whitechain-sdk viem
 ```
 
-## Quick Start
+## 🚀 Quick Start
+
+Initialize the client and start interacting with the network:
 
 ```ts
 import { createWhiteChainClient } from 'whitechain-sdk'
@@ -24,79 +37,75 @@ const client = createWhiteChainClient({
   // account: yourAccount, // required for writes
 })
 
-// read
+// Read Operations
 const round = await client.getGrantRound(1n)
 
-// write (requires account and ABI)
-await client.submitApplication({ grantId: 1n, applicant: '0x...', metadataUri: 'ipfs://...' })
+// Write Operations (Requires account & ABI)
+await client.submitApplication({ 
+  grantId: 1n, 
+  applicant: '0x...', 
+  metadataUri: 'ipfs://...' 
+})
 ```
 
-## Supported Methods
+## 🛠️ Supported Methods
 
-- createWhiteChainClient
-- submitApplication
-- approveApplication
-- submitMilestoneEvidence
-- approveMilestone
-- releasePayout
-- getGrantRound
-- getGrantApplication
-- getMilestones
+- `createWhiteChainClient`
+- `submitApplication`
+- `approveApplication`
+- `submitMilestoneEvidence`
+- `approveMilestone`
+- `releasePayout`
+- `getGrantRound`
+- `getGrantApplication`
+- `getMilestones`
 
-## Omitted By Design
+## 🏗️ Design Philosophy
 
-- extensive query abstractions
-- advanced metadata tooling
-- governance adapters
-- plugin systems
-- broad chain support
-- complex caching layers
-- large helper libraries
-- generated docs site
-- exhaustive utility abstractions
+**Omitted By Design** to keep the SDK fast and secure:
+- Extensive query abstractions
+- Advanced metadata tooling
+- Broad chain support (focused strictly on WhiteChain)
+- Complex caching layers
+- Large helper libraries
 
-## Extending the SDK
-
-- Keep the public API small and typed.
+**Extending the SDK**:
+- Keep the public API small and strongly typed.
 - Add new actions/reads near the existing ones in `src/client.ts`.
 - Reuse existing patterns: clean parameter objects, simple error messages.
-- When adding future features (voting, delegation, analytics, reputation), place TODOs first and avoid premature abstraction.
 
-## Development
+## 💻 Development
 
-Scripts:
+Available scripts for local development:
 
-- `npm run build` – typecheck and emit ESM to `dist/`
-- `npm run typecheck` – typecheck only
-- `npm run test` – runs basic unit tests
+- `npm run build` – Typecheck and emit ESM to `dist/`
+- `npm run typecheck` – Typecheck only
+- `npm run test` – Run unit tests via Vitest
 
-## Notes
+## 🤝 Contributing
 
-- The SDK expects the Grant contract address in config and the corresponding ABI for writes and typed reads.
-- Clean, user-facing errors are thrown if required pieces are missing (e.g., ABI or wallet for writes).
+We strongly believe in open-source and welcome contributions from the community!
 
-## Contributing
+1. Fork the repository.
+2. Create your feature branch (`git checkout -b feature/amazing-feature`).
+3. Commit your changes (`git commit -m 'Add some amazing feature'`).
+4. Push to the branch (`git push origin feature/amazing-feature`).
+5. Open a Pull Request.
 
-We welcome contributions through GrantFox! See [CONTRIBUTING.md](CONTRIBUTING.md) for details on:
-- How to claim issues via GrantFox
-- Development setup and testing
-- Pull request process
-- Code style guidelines
+Please review our [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
-## GrantFox
+### GrantFox Platform
 
-This repository is part of the Adamantine Guild project and participates in GrantFox for open-source collaboration. Contributors can:
-- Browse and claim issues via [GrantFox Contributor App](https://contribute.grantfox.xyz/)
-- Follow contribution guidelines in [CONTRIBUTING.md](CONTRIBUTING.md)
-- Track PR reviews and campaign participation
+This repository participates in **GrantFox** for open-source collaboration. Contributors can:
+- Browse and claim issues via the [GrantFox Contributor App](https://contribute.grantfox.xyz/)
+- Track PR reviews and campaign participation.
 
 Maintainers manage campaigns and review contributions via the [GrantFox Maintainer App](https://maintainer.grantfox.xyz/).
 
-## License
+## 🛡️ Security
 
-MIT - see [LICENSE](LICENSE) file for details.
+For security policies and vulnerability reporting, please refer to [SECURITY.md](SECURITY.md).
 
-## Security
+## 📄 License
 
-For security concerns, please see [SECURITY.md](SECURITY.md).
-
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
