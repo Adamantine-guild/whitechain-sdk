@@ -3,6 +3,18 @@ export {
   type WhiteChainClient,
 } from './client.js'
 export { formatUnits, parseUnits } from './utils/math.js'
+export {
+  validateStakingInput,
+  type StakingValidationOptions,
+  type ValidationResult,
+} from './utils/validation.js'
+export {
+  StakingForm,
+  handleStakingInputChange,
+  type StakingFormProps,
+  type FormattedStakingState,
+} from './components/staking/StakingForm.js'
+
 export { toChecksumAddress, isAddress, assertChecksumAddress } from './utils/address.js'
 export * from './constants.js'
 export * from './config/networks.js'

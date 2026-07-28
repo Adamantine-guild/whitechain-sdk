@@ -1,3 +1,5 @@
+import type { Abi, Address, PublicClient } from 'viem'
+import { WhiteChainError } from '../types.js'
 import type { Address, PublicClient, WalletClient, Hash } from 'viem'
 import type { Abi, ExtractAbiFunctionNames, ExtractAbiFunction, AbiParametersToPrimitiveTypes, AbiStateMutability } from 'abitype'
 import { ValidationError } from '../errors/index.js'
