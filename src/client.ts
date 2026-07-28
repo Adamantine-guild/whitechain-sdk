@@ -118,6 +118,10 @@ const defaultTransport = http()
 export function createWhiteChainClient(config: WhiteChainConfig & { provider?: any }): WhiteChainClient {
   const network = config.network
   const blockExplorerUrl = config.blockExplorerUrl ?? network?.blockExplorerUrl
+  const transport =
+    config.transport ??
+    (network
+      ? http(network.rpcUrl)
   const initialNetwork = config.network
   const blockExplorerUrl = config.blockExplorerUrl ?? initialNetwork?.blockExplorerUrl
   const transport =
@@ -130,6 +134,7 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
           : new Eip1193Provider(config.provider)
         ).toTransport()
       : defaultTransport)
+  const chain = config.chain ?? network?.chain
   const chain = config.chain ?? initialNetwork?.chain
 
   const initialPublicClient =
