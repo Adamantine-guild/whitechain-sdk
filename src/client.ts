@@ -11,12 +11,14 @@ import {
   GrantApplication,
   Milestone,
 } from './types.js'
-import { WhiteChainError } from './types.js'
+import { WhiteChainError, ValidationError } from './errors/index.js'
+import { parseContractError } from './utils/errorHandler.js'
 import type { NetworkProfile } from './config/networks.js'
 import { Eip1193Provider } from './providers/BrowserProvider.js'
+import { withGasEstimation, type WithGasEstimation } from './core/TransactionHelper.js'
 
 const ensure = <T>(value: T | undefined, message: string): T => {
-  if (value === undefined || value === null) throw new WhiteChainError(message)
+  if (value === undefined || value === null) throw new ValidationError(message)
   return value
 }
 
@@ -39,35 +41,35 @@ export type WhiteChainClient = ClientDeps & {
    * @throws {WhiteChainError} if the client has no signing account, or no `abis.grant` was provided.
    * @returns The transaction hash.
    */
-  submitApplication(params: SubmitApplicationParams): Promise<Hash>
+  submitApplication: WithGasEstimation<SubmitApplicationParams>
 
   /**
    * Approves a pending grant application.
    * @throws {WhiteChainError} if the client has no signing account, or no `abis.grant` was provided.
    * @returns The transaction hash.
    */
-  approveApplication(params: ApproveApplicationParams): Promise<Hash>
+  approveApplication: WithGasEstimation<ApproveApplicationParams>
 
   /**
    * Submits evidence for a milestone.
    * @throws {WhiteChainError} if the client has no signing account, or no `abis.grant` was provided.
    * @returns The transaction hash.
    */
-  submitMilestoneEvidence(params: SubmitMilestoneEvidenceParams): Promise<Hash>
+  submitMilestoneEvidence: WithGasEstimation<SubmitMilestoneEvidenceParams>
 
   /**
    * Approves previously submitted milestone evidence.
    * @throws {WhiteChainError} if the client has no signing account, or no `abis.grant` was provided.
    * @returns The transaction hash.
    */
-  approveMilestone(params: ApproveMilestoneParams): Promise<Hash>
+  approveMilestone: WithGasEstimation<ApproveMilestoneParams>
 
   /**
    * Releases the payout for an approved milestone to its grantee.
    * @throws {WhiteChainError} if the client has no signing account, or no `abis.grant` was provided.
    * @returns The transaction hash.
    */
-  releasePayout(params: ReleasePayoutParams): Promise<Hash>
+  releasePayout: WithGasEstimation<ReleasePayoutParams>
 
   /**
    * Reads a grant round's current status and application count.
@@ -205,27 +207,158 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
         args: [milestoneId],
       } as any)
     },
+    submitApplication: withGasEstimation(
+      async ({ grantId, applicant, metadataUri }) => {
+        const wc = requireWallet()
+        const abi = requireGrantAbi()
+        try {
+          return await (wc as any).writeContract({
+            address: addresses.grant,
+            abi,
+            functionName: 'submitApplication',
+            args: [grantId, applicant, metadataUri],
+          } as any)
+        } catch (err) {
+          throw parseContractError(err, abi as Abi)
+        }
+      },
+      publicClient,
+      addresses.grant,
+      abis.grant as Abi,
+      'submitApplication',
+      (params) => [params.grantId, params.applicant, params.metadataUri]
+    ),
+
+    approveApplication: withGasEstimation(
+      async ({ applicationId }) => {
+        const wc = requireWallet()
+        const abi = requireGrantAbi()
+        try {
+          return await (wc as any).writeContract({
+            address: addresses.grant,
+            abi,
+            functionName: 'approveApplication',
+            args: [applicationId],
+          } as any)
+        } catch (err) {
+          throw parseContractError(err, abi as Abi)
+        }
+      },
+      publicClient,
+      addresses.grant,
+      abis.grant as Abi,
+      'approveApplication',
+      (params) => [params.applicationId]
+    ),
+
+    submitMilestoneEvidence: withGasEstimation(
+      async ({ milestoneId, evidenceUri }) => {
+        const wc = requireWallet()
+        const abi = requireGrantAbi()
+        try {
+          return await (wc as any).writeContract({
+            address: addresses.grant,
+            abi,
+            functionName: 'submitMilestoneEvidence',
+            args: [milestoneId, evidenceUri],
+          } as any)
+        } catch (err) {
+          throw parseContractError(err, abi as Abi)
+        }
+      },
+      publicClient,
+      addresses.grant,
+      abis.grant as Abi,
+      'submitMilestoneEvidence',
+      (params) => [params.milestoneId, params.evidenceUri]
+    ),
+
+    approveMilestone: withGasEstimation(
+      async ({ milestoneId }) => {
+        const wc = requireWallet()
+        const abi = requireGrantAbi()
+        try {
+          return await (wc as any).writeContract({
+            address: addresses.grant,
+            abi,
+            functionName: 'approveMilestone',
+            args: [milestoneId],
+          } as any)
+        } catch (err) {
+          throw parseContractError(err, abi as Abi)
+        }
+      },
+      publicClient,
+      addresses.grant,
+      abis.grant as Abi,
+      'approveMilestone',
+      (params) => [params.milestoneId]
+    ),
+
+    releasePayout: withGasEstimation(
+      async ({ milestoneId }) => {
+        const wc = requireWallet()
+        const abi = requireGrantAbi()
+        try {
+          return await (wc as any).writeContract({
+            address: addresses.grant,
+            abi,
+            functionName: 'releasePayout',
+            args: [milestoneId],
+          } as any)
+        } catch (err) {
+          throw parseContractError(err, abi as Abi)
+        }
+      },
+      publicClient,
+      addresses.grant,
+      abis.grant as Abi,
+      'releasePayout',
+      (params) => [params.milestoneId]
+    ),
 
     async getGrantRound(grantId) {
       const abi = requireGrantAbi()
-      const [status, applicationsCount] = await (publicClient as any).readContract({
+      let status, applicationsCount;
+      try {
+        [status, applicationsCount] = await (publicClient as any).readContract({
+          address: addresses.grant,
+          abi,
+          functionName: 'getGrantRound',
+          args: [grantId],
+        }) as readonly [number, bigint]
+      } catch (err) {
+        throw parseContractError(err, abi as Abi)
+      }
+      const [status, applicationsCount] = (await (publicClient as any).readContract({
         address: addresses.grant,
         abi,
         functionName: 'getGrantRound',
         args: [grantId],
-      }) as readonly [number, bigint]
+      })) as readonly [number, bigint]
       const statusMap: Record<number, GrantRound['status']> = { 0: 'open', 1: 'closed', 2: 'archived' }
       return { id: grantId, status: statusMap[status] ?? 'open', applicationsCount }
     },
 
     async getGrantApplication(applicationId) {
       const abi = requireGrantAbi()
-      const [applicant, status, metadataUri] = await (publicClient as any).readContract({
+      let applicant, status, metadataUri;
+      try {
+        [applicant, status, metadataUri] = await (publicClient as any).readContract({
+          address: addresses.grant,
+          abi,
+          functionName: 'getGrantApplication',
+          args: [applicationId],
+        }) as readonly [Address, number, string]
+      } catch (err) {
+        throw parseContractError(err, abi as Abi)
+      }
+      const [applicant, status, metadataUri] = (await (publicClient as any).readContract({
         address: addresses.grant,
         abi,
         functionName: 'getGrantApplication',
         args: [applicationId],
-      }) as readonly [Address, number, string]
+      })) as readonly [Address, number, string]
       const statusMap: Record<number, 'submitted' | 'approved' | 'rejected'> = {
         0: 'submitted',
         1: 'approved',
@@ -236,11 +369,23 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
 
     async getMilestones(applicationId) {
       const abi = requireGrantAbi()
-      const raw = await (publicClient as any).readContract({
+      let raw;
+      try {
+        raw = await (publicClient as any).readContract({
+          address: addresses.grant,
+          abi,
+          functionName: 'getMilestones',
+          args: [applicationId],
+        }) as unknown as Array<readonly [bigint, number, string]>
+      } catch (err) {
+        throw parseContractError(err, abi as Abi)
+      }
+      const raw = (await (publicClient as any).readContract({
         address: addresses.grant,
         abi,
         functionName: 'getMilestones',
         args: [applicationId],
+      })) as unknown as Array<readonly [bigint, number, string]>
       }) as unknown as Array<readonly [bigint, number, string]>
 
       const statusMap: Record<number, Milestone['status']> = {

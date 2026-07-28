@@ -10,4 +10,12 @@
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "dist/cjs",
+    "skipLibCheck": true
+  },
+  "include": ["src"]
 }
