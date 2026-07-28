@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import type { Abi, Address } from 'viem'
 import { createWhiteChainClient } from '../src/index.js'
+import { networks } from '../src/config/networks.js'
 
 const dummyAbi = [
   { type: 'function', name: 'submitApplication', stateMutability: 'nonpayable', inputs: [
@@ -98,6 +99,22 @@ describe('WhiteChainClient', () => {
       { id: 1n, status: 'approved', evidenceUri: 'ipfs://e1' },
       { id: 2n, status: 'paid', evidenceUri: undefined },
     ])
+  })
+
+  it('updates clients dynamically when switchNetwork is called', async () => {
+    const client = createWhiteChainClient({
+      network: networks.sepolia,
+      addresses: { grant: grantAddress },
+      abis: { grant: dummyAbi },
+    })
+
+    expect(client.network?.name).toBe('Sepolia')
+    const originalPublicClient = client.publicClient
+
+    await client.switchNetwork(1875) // WhiteChain Mainnet
+    
+    expect(client.network?.name).toBe('WhiteChain Mainnet')
+    expect(client.publicClient).not.toBe(originalPublicClient)
   })
 })
 
