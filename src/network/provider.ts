@@ -1,6 +1,7 @@
 import { http, type Transport } from 'viem'
 import type { WhiteChainConfig, WhiteChainAddresses } from '../types.js'
 import type { NetworkProfile } from '../config/networks.js'
+import { ValidationError } from '../errors/index.js'
 
 type RateLimitListener = () => void
 
@@ -26,7 +27,7 @@ export class Provider {
 
   constructor(network: NetworkProfile, options?: ProviderOptions) {
     if (!network || typeof network.chainId !== 'number') {
-      throw new Error('Invalid network profile provided to Provider')
+      throw new ValidationError('Invalid network profile provided to Provider')
     }
     this.network = network
     this.chainId = network.chainId
