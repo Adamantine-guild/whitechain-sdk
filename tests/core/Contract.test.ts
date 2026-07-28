@@ -1,3 +1,5 @@
+import { describe, it, expect, vi } from 'vitest'
+import { Contract } from '../../src/core/Contract.js'
 import { describe, expect, it, vi } from 'vitest'
 import { Contract } from '../../src/core/Contract.js'
 import { WhiteChainError } from '../../src/types.js'
@@ -154,7 +156,6 @@ describe('Contract — read() / write()', () => {
       args: ['0xabcdef1234567890abcdef1234567890abcdef12', 50n],
     })
   })
-
   it('throws if clients are missing', async () => {
     const contract = new Contract('0x1234567890123456789012345678901234567890', mockAbi)
 

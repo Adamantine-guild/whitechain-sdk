@@ -1,3 +1,12 @@
+import type { Address, PublicClient, WalletClient, Hash } from 'viem'
+import type { Abi, ExtractAbiFunctionNames, ExtractAbiFunction, AbiParametersToPrimitiveTypes, AbiStateMutability } from 'abitype'
+import { ValidationError } from '../errors/index.js'
+import { parseContractError } from '../utils/errorHandler.js'
+
+type Prettify<T> = {
+  [K in keyof T]: T[K]
+} & {}
+
 import type { Abi, Address, PublicClient } from 'viem'
 import { WhiteChainError } from '../types.js'
 import type { Abi, Address, PublicClient, WalletClient, Hash } from 'viem'
@@ -53,6 +62,15 @@ type ExtractReturnType<
     : TOutputs
   : never
 
+export class Contract<
+  TAbi extends Abi | readonly unknown[] = Abi,
+> {
+  constructor(
+    public readonly address: Address,
+    public readonly abi: TAbi,
+    public readonly publicClient?: PublicClient,
+    public readonly walletClient?: WalletClient,
+  ) {}
 /**
  * Representation of a deployed smart contract bound to an address, ABI, and optional clients.
  *
@@ -169,12 +187,16 @@ export class Contract<
 
     const _args = args.length > 0 ? (args[0] as unknown[]) : []
 
-    return (this.publicClient as any).readContract({
-      address: this.address,
-      abi: this.abi,
-      functionName,
-      args: _args,
-    })
+    try {
+      return await (this.publicClient as any).readContract({
+        address: this.address,
+        abi: this.abi,
+        functionName,
+        args: _args,
+      })
+    } catch (err) {
+      throw parseContractError(err, this.abi as Abi)
+    }
   }
 
   /**
@@ -193,11 +215,15 @@ export class Contract<
 
     const _args = args.length > 0 ? (args[0] as unknown[]) : []
 
-    return (this.walletClient as any).writeContract({
-      address: this.address,
-      abi: this.abi,
-      functionName,
-      args: _args,
-    })
+    try {
+      return await (this.walletClient as any).writeContract({
+        address: this.address,
+        abi: this.abi,
+        functionName,
+        args: _args,
+      })
+    } catch (err) {
+      throw parseContractError(err, this.abi as Abi)
+    }
   }
 }

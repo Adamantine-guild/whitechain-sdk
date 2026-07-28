@@ -31,6 +31,8 @@ export type {
 
 export { TODO } from './types.js'
 export * from './errors/index.js'
+export * from './errors/WhitechainErrors.js'
+export { parseContractError } from './utils/errorHandler.js'
 export * from './storage/index.js'
 
 export {

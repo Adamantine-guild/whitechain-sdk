@@ -7,6 +7,7 @@ describe('TransactionHelper', () => {
 
   beforeEach(() => {
     fetchFn = vi.fn();
+    helper = new TransactionHelper(fetchFn as unknown as import("../../src/core/TransactionHelper.js").RpcFetchFn);
 import { TransactionHelper, type RpcFetchFn } from '../../src/core/TransactionHelper.js';
 
 describe('TransactionHelper', () => {

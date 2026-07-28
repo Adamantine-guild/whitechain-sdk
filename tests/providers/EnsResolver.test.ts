@@ -24,6 +24,7 @@ describe('EnsResolver', () => {
 
   beforeEach(() => {
     fetchFn = vi.fn();
+    resolver = new EnsResolver(fetchFn as unknown as import("../../src/core/TransactionHelper.js").RpcFetchFn);
   let fetchFn: RpcFetchFn;
   let resolver: EnsResolver;
 

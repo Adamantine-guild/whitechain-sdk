@@ -1,4 +1,5 @@
 import type { Address, Abi, Hash } from 'viem';
+import { parseContractError } from '../utils/errorHandler.js';
 
 // ---------------------------------------------------------------------------
 // withGasEstimation — higher-order function for write methods
@@ -35,12 +36,17 @@ export function withGasEstimation<TParams>(
   const wrapped = Object.assign(fn, {
     estimateGas: async (params: TParams, options?: GasOptions) => {
       const multiplier = options?.multiplier ?? defaultMultiplier;
-      const baseGas = await (publicClient as any).estimateContractGas({
-        address,
-        abi,
-        functionName,
-        args: argsMapper(params),
-      });
+      let baseGas: bigint;
+      try {
+        baseGas = await (publicClient as any).estimateContractGas({
+          address,
+          abi,
+          functionName,
+          args: argsMapper(params),
+        });
+      } catch (err) {
+        throw parseContractError(err, abi);
+      }
       // apply buffer (pad by multiplier)
       return (baseGas * BigInt(Math.floor(multiplier * 100))) / 100n;
     },
