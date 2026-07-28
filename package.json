@@ -33,6 +33,11 @@
       "types": "./dist/esm/crypto/index.d.ts",
       "import": "./dist/esm/crypto/index.js",
       "require": "./dist/cjs/crypto/index.js"
+    },
+    "./core": {
+      "types": "./dist/esm/core/index.d.ts",
+      "import": "./dist/esm/core/index.js",
+      "require": "./dist/cjs/core/index.js"
     }
   },
   "files": [
@@ -41,8 +46,6 @@
   "scripts": {
     "build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && node -e \"fs.mkdirSync('dist/esm', {recursive: true}); fs.writeFileSync('dist/esm/package.json', '{\\\"type\\\": \\\"module\\\"}')\" && node -e \"fs.mkdirSync('dist/cjs', {recursive: true}); fs.writeFileSync('dist/cjs/package.json', '{\\\"type\\\": \\\"commonjs\\\"}')\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "build": "tsc --skipLibCheck -p tsconfig.esm.json && tsc --skipLibCheck -p tsconfig.cjs.json && node -e \"fs.mkdirSync('dist/esm', {recursive: true}); fs.writeFileSync('dist/esm/package.json', '{\\\"type\\\": \\\"module\\\"}')\" && node -e \"fs.mkdirSync('dist/cjs', {recursive: true}); fs.writeFileSync('dist/cjs/package.json', '{\\\"type\\\": \\\"commonjs\\\"}')\"",
-    "typecheck": "tsc --skipLibCheck -p tsconfig.json --noEmit",
     "test": "vitest run",
     "bench": "node bench/signer.bench.mjs",
     "docs": "typedoc"
