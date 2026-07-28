@@ -17,6 +17,8 @@ import { networks, type NetworkProfile } from './config/networks.js'
 import { Eip1193Provider } from './providers/BrowserProvider.js'
 import { withGasEstimation, type WithGasEstimation } from './core/TransactionHelper.js'
 import { NetworkContext } from './core/NetworkContext.js'
+import { Simulator } from './services/Simulator.js'
+import type { SimulationResult, SimulationOptions } from './types/simulation.js'
 
 const ensure = <T>(value: T | undefined, message: string): T => {
   if (value === undefined || value === null) throw new ValidationError(message)
@@ -49,6 +51,15 @@ export type WhiteChainClient = {
    * @throws {WhiteChainError} if the chainId is not found in the registry.
    */
   switchNetwork(chainId: number): Promise<void>
+
+  /**
+   * Dry-runs a transaction against the node's current state to validate outcomes
+   * before signing (e.g., checking for expected token transfers or revert reasons).
+   */
+  simulateTransaction(
+    tx: { to: Address; data: string; from?: Address; value?: bigint },
+    options?: SimulationOptions
+  ): Promise<SimulationResult>
 
   /**
    * Submits a new grant application on behalf of `applicant`.
@@ -188,6 +199,12 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
         walletClient: newWalletClient as any,
         addresses: networkContext.getState().addresses,
       });
+    },
+
+    async simulateTransaction(tx, options) {
+      const simulator = new Simulator(networkContext.getState().publicClient);
+      // We pass the grant contract ABI by default so it can decode grant errors natively
+      return simulator.simulateTransaction(tx, abis.grant, options);
     },
 
     submitApplication: withGasEstimation(
