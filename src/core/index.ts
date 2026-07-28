@@ -1,1 +1,1 @@
-export { Contract, type ContractClient } from './Contract.js'
+export { Contract } from './Contract.js'

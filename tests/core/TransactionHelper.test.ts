@@ -7,7 +7,7 @@ describe('TransactionHelper', () => {
 
   beforeEach(() => {
     fetchFn = vi.fn();
-    helper = new TransactionHelper(fetchFn);
+    helper = new TransactionHelper(fetchFn as unknown as import("../../src/core/TransactionHelper.js").RpcFetchFn);
   });
 
   it('estimates gas and applies the default 1.2x buffer correctly', async () => {

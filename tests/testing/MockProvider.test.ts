@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { MockProvider, returns } from '../../src/testing/MockProvider'
+import { MockProvider, returns } from '../../src/testing/MockProvider.js'
 
 describe('MockProvider', () => {
   it('intercepts calls and returns dummy data', async () => {

@@ -32,6 +32,8 @@ export type {
 
 export { TODO } from './types.js'
 export * from './errors/index.js'
+export * from './errors/WhitechainErrors.js'
+export { parseContractError } from './utils/errorHandler.js'
 
 export {
   Eip1193Provider,
@@ -45,7 +47,6 @@ export {
   type IpcProviderOptions,
 } from './providers/IpcProvider.js'
 
-export { Contract, type ContractClient } from './core/Contract.js'
 
 export {
   MockProvider,

@@ -23,7 +23,7 @@ describe('EnsResolver', () => {
 
   beforeEach(() => {
     fetchFn = vi.fn();
-    resolver = new EnsResolver(fetchFn);
+    resolver = new EnsResolver(fetchFn as unknown as import("../../src/core/TransactionHelper.js").RpcFetchFn);
   });
 
   it('returns the ENS name for a valid address', async () => {
