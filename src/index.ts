@@ -103,6 +103,8 @@ export {
   type SignerBackend,
 } from './crypto/index.js'
 
+export { Simulator } from './services/Simulator.js'
+export type { SimulationResult, SimulationOptions, TransferEvent, StateOverrides } from './types/simulation.js'
 // ---------------------------------------------------------------------------
 // Plugin system
 // ---------------------------------------------------------------------------

@@ -14,6 +14,11 @@ import {
 import { WhiteChainError, ValidationError } from './errors/index.js'
 import { parseContractError } from './utils/errorHandler.js'
 import { networks, type NetworkProfile } from './config/networks.js'
+import { Eip1193Provider } from './providers/BrowserProvider.js'
+import { withGasEstimation, type WithGasEstimation } from './core/TransactionHelper.js'
+import { NetworkContext } from './core/NetworkContext.js'
+import { Simulator } from './services/Simulator.js'
+import type { SimulationResult, SimulationOptions } from './types/simulation.js'
 import type { NetworkProfile } from './config/networks.js'
 import { Eip1193Provider } from './providers/BrowserProvider.js'
 import { withGasEstimation, type WithGasEstimation } from './core/TransactionHelper.js'
@@ -50,6 +55,15 @@ export type WhiteChainClient = {
    * @throws {WhiteChainError} if the chainId is not found in the registry.
    */
   switchNetwork(chainId: number): Promise<void>
+
+  /**
+   * Dry-runs a transaction against the node's current state to validate outcomes
+   * before signing (e.g., checking for expected token transfers or revert reasons).
+   */
+  simulateTransaction(
+    tx: { to: Address; data: string; from?: Address; value?: bigint },
+    options?: SimulationOptions
+  ): Promise<SimulationResult>
 
   /**
    * Submits a new grant application on behalf of `applicant`.
@@ -116,8 +130,8 @@ const defaultTransport = http()
  * client — calling a write method on it throws a {@link WhiteChainError}.
  */
 export function createWhiteChainClient(config: WhiteChainConfig & { provider?: any }): WhiteChainClient {
-  const network = config.network
-  const blockExplorerUrl = config.blockExplorerUrl ?? network?.blockExplorerUrl
+  const initialNetwork = config.network
+  const blockExplorerUrl = config.blockExplorerUrl ?? initialNetwork?.blockExplorerUrl
   const transport =
     config.transport ??
     (network
@@ -198,6 +212,10 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
       });
     },
 
+    async simulateTransaction(tx, options) {
+      const simulator = new Simulator(networkContext.getState().publicClient);
+      // We pass the grant contract ABI by default so it can decode grant errors natively
+      return simulator.simulateTransaction(tx, abis.grant, options);
     async submitApplication({ grantId, applicant, metadataUri }) {
       const wc = requireWallet()
       const abi = requireGrantAbi()
