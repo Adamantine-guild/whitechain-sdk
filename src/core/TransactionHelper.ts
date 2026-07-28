@@ -89,6 +89,12 @@ export class TransactionHelper {
   }
 
   /**
+   * Calls eth_estimateGas and safely applies a scaling buffer.
+   * Returns a BigInt representing the padded gas limit.
+   */
+  async estimateGas(transaction: Record<string, any>, options?: EstimateGasOptions): Promise<bigint> {
+    const rawEstimateHex = await this.fetchFn('eth_estimateGas', [transaction, 'latest']);
+    
    * Calls `eth_estimateGas` and safely applies a scaling buffer.
    * Returns a `BigInt` representing the padded gas limit.
    */

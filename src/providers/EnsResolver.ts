@@ -126,3 +126,8 @@ export class EnsResolver {
     return toHex(bytes);
   }
 }
+
+export function createEnsResolver(fetchFn: RpcFetchFn): EnsResolver {
+  return new EnsResolver(fetchFn);
+}
+

@@ -1,3 +1,5 @@
+import type { Abi, Address, PublicClient } from 'viem'
+import { WhiteChainError } from '../types.js'
 import type { Abi, Address, PublicClient, WalletClient, Hash } from 'viem'
 import type { ExtractAbiFunctionNames, ExtractAbiFunction, AbiParametersToPrimitiveTypes, AbiStateMutability } from 'abitype'
 import { WhiteChainError } from '../types.js'
@@ -14,6 +16,15 @@ export type ContractClient =
       publicClient?: PublicClient
     }
 
+/**
+ * Representation of a deployed smart contract bound to an address, ABI, and provider/client.
+ */
+export class Contract {
+  public readonly address: Address
+  public readonly abi: Abi
+  public readonly client: ContractClient
+
+  constructor(address: Address, abi: Abi, client: ContractClient) {
 // Helper to extract argument types for a given ABI function
 type ExtractArgs<
   TAbi extends Abi,
@@ -84,6 +95,7 @@ export class Contract<
     }
     this.address = address
     this.abi = abi
+    this.client = client
     // Support both calling conventions
     if (publicClientOrContractClient !== undefined) {
       // If a ContractClient-style object (no `request` matching PublicClient signature, or has `getCode`)
@@ -107,11 +119,13 @@ export class Contract<
    * Explicitly checks if contract bytecode exists at the configured address by calling `eth_getCode`.
    *
    * @throws {WhiteChainError} if no bytecode exists at the address (returns '0x' or empty).
+   * @returns {Promise<this>} Resolves to `this` instance for method chaining if contract code exists.
    * @returns {Promise<this>} Resolves to `this` for method chaining if contract code exists.
    */
   async verify(): Promise<this> {
     let code: string | undefined
 
+    const clientAny = this.client as any
     const clientAny = (this.client ?? this.publicClient) as any
 
     if (!clientAny) {
