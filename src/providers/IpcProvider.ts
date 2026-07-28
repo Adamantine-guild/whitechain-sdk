@@ -1,6 +1,6 @@
 import type { Transport } from 'viem'
 import { custom } from 'viem'
-import { WhiteChainError } from '../types.js'
+import { ValidationError, RpcError } from '../errors/index.js'
 
 export interface IpcProviderOptions {
   path: string | number
@@ -48,7 +48,7 @@ export class IpcProvider {
 
   constructor(options: string | number | IpcProviderOptions) {
     if (typeof window !== 'undefined') {
-      throw new WhiteChainError('IpcProvider is only supported in Node.js environment')
+      throw new ValidationError('IpcProvider is only supported in Node.js environment')
     }
 
     if (typeof options === 'string' || typeof options === 'number') {
@@ -59,7 +59,7 @@ export class IpcProvider {
       this.timeoutMs = options.timeoutMs ?? 30000
       this._connectFn = options.connectFn
     } else {
-      throw new WhiteChainError('IPC socket path must be provided to IpcProvider')
+      throw new ValidationError('IPC socket path must be provided to IpcProvider')
     }
   }
 
@@ -77,7 +77,7 @@ export class IpcProvider {
     try {
       net = await import('node:net')
     } catch {
-      throw new WhiteChainError('Node.js net module is unavailable in this environment')
+      throw new ValidationError('Node.js net module is unavailable in this environment')
     }
 
     return new Promise((resolve, reject) => {
@@ -213,7 +213,7 @@ export class IpcProvider {
           if (pending) {
             this._pendingRequests.delete(response.id)
             if (response.error) {
-              pending.reject(new Error(`JSON-RPC Error [${response.error.code}]: ${response.error.message}`))
+              pending.reject(new RpcError(`JSON-RPC Error [${response.error.code}]: ${response.error.message}`, response.error.code, response.error.data))
             } else {
               pending.resolve(response.result)
             }

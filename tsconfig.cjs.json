@@ -1,5 +1,15 @@
 {
   "compilerOptions": {
+    "target": "ES2021",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "lib": ["ES2022", "DOM"],
+    "outDir": "dist/cjs",
+    "skipLibCheck": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+  "compilerOptions": {
     "target": "ES2020",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",

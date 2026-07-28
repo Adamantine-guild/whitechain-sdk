@@ -1,5 +1,5 @@
 import { custom, type Transport, type Address } from 'viem'
-import { WhiteChainError } from '../types.js'
+import { WhiteChainError, ValidationError } from '../errors/index.js'
 import type { WhiteChainConfig } from '../types.js'
 import { createWhiteChainClient, type WhiteChainClient } from '../client.js'
 
@@ -21,7 +21,7 @@ export class Eip1193Provider {
     const p = provider ?? injected
 
     if (!p) {
-      throw new WhiteChainError('No EIP-1193 provider found. Please pass an explicit provider or connect a wallet like MetaMask.')
+      throw new ValidationError('No EIP-1193 provider found. Please pass an explicit provider or connect a wallet like MetaMask.')
     }
 
     this.rawProvider = p
@@ -62,7 +62,7 @@ export class Eip1193Provider {
 
   public async request<T = unknown>(args: { method: string; params?: unknown[] | Record<string, unknown> }): Promise<T> {
     if (!this._isConnected) {
-      throw new WhiteChainError('Provider is disconnected')
+      throw new ValidationError('Provider is disconnected')
     }
 
     try {

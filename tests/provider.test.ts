@@ -66,4 +66,31 @@ describe('Provider Exponential Backoff & 429 Retry', () => {
     expect(callCount).toBe(3) // Initial call + 2 retries = 3 total calls
     expect(rateLimitListener).toHaveBeenCalledTimes(3)
   })
+
+  it('polls for a transaction receipt until it is available', async () => {
+    const provider = new Provider(whitechainTestnet)
+    const receipt = { transactionHash: '0xabc', status: '0x1' }
+    let callCount = 0
+
+    globalThis.fetch = vi.fn().mockImplementation(async () => {
+      callCount++
+      return new Response(JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        result: callCount === 1 ? null : receipt,
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+    })
+
+    const result = await provider.waitForTransaction('0xabc', { intervalMs: 1 })
+
+    expect(result).toEqual(receipt)
+    expect(callCount).toBe(2)
+    expect(globalThis.fetch).toHaveBeenLastCalledWith(
+      whitechainTestnet.rpcUrl,
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining('eth_getTransactionReceipt'),
+      }),
+    )
+  })
 })
