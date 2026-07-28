@@ -1,6 +1,10 @@
 import type { Address, Abi, Hash } from 'viem';
 import { parseContractError } from '../utils/errorHandler.js';
 
+// ---------------------------------------------------------------------------
+// withGasEstimation — higher-order function for write methods
+// ---------------------------------------------------------------------------
+
 export type GasOptions = { multiplier?: number };
 
 export type WithGasEstimation<TParams, TReturn = Hash> = {
@@ -8,6 +12,18 @@ export type WithGasEstimation<TParams, TReturn = Hash> = {
   estimateGas(params: TParams, options?: GasOptions): Promise<bigint>;
 };
 
+/**
+ * Wraps a write function with an `estimateGas` method so callers can
+ * preview the gas cost before submitting a transaction.
+ *
+ * @param fn - The underlying write function.
+ * @param publicClient - Used for `estimateContractGas`.
+ * @param address - The contract address.
+ * @param abi - The contract ABI.
+ * @param functionName - The function to estimate gas for.
+ * @param argsMapper - Maps the params object to an args array.
+ * @param defaultMultiplier - Gas buffer multiplier (default 1.2 = +20%).
+ */
 export function withGasEstimation<TParams>(
   fn: (params: TParams) => Promise<Hash>,
   publicClient: any,
@@ -38,6 +54,10 @@ export function withGasEstimation<TParams>(
   return wrapped;
 }
 
+// ---------------------------------------------------------------------------
+// TransactionHelper — class-based gas estimation
+// ---------------------------------------------------------------------------
+
 export type RpcFetchFn = (method: string, params: any[]) => Promise<any>;
 
 export interface EstimateGasOptions {
@@ -49,6 +69,13 @@ export interface EstimateGasOptions {
   multiplier?: number;
 }
 
+/**
+ * Utility class for estimating gas costs via a raw RPC fetch function.
+ *
+ * Use this when you have a bare `eth_estimateGas` RPC caller rather than
+ * a viem `PublicClient`. For viem-based estimation, prefer
+ * {@link withGasEstimation}.
+ */
 export class TransactionHelper {
   private fetchFn: RpcFetchFn;
   private defaultMultiplier = 1.2;
@@ -74,6 +101,12 @@ export class TransactionHelper {
   async estimateGas(transaction: Record<string, any>, options?: EstimateGasOptions): Promise<bigint> {
     const rawEstimateHex = await this.fetchFn('eth_estimateGas', [transaction, 'latest']);
     
+   * Calls `eth_estimateGas` and safely applies a scaling buffer.
+   * Returns a `BigInt` representing the padded gas limit.
+   */
+  async estimateGas(transaction: Record<string, any>, options?: EstimateGasOptions): Promise<bigint> {
+    const rawEstimateHex = await this.fetchFn('eth_estimateGas', [transaction, 'latest']);
+
     if (!rawEstimateHex || typeof rawEstimateHex !== 'string' || !rawEstimateHex.startsWith('0x')) {
       throw new Error('Invalid response from eth_estimateGas');
     }

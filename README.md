@@ -74,6 +74,127 @@ const isValid = await verify(messageHash, signature, publicKey)
 
 Both backends produce identical, low-S-normalized, RFC6979-deterministic output for the same input — the WASM path is purely a performance optimization, never a behavioral change.
 
+## 🔌 Plugin System
+
+The SDK ships a first-class plugin architecture so community developers can extend the `WhitechainSDK` instance with custom namespaces — NFT marketplace helpers, lending calculators, analytics modules — without forking the core SDK or adding bloat to the core bundle.
+
+### Core concepts
+
+| Concept | Description |
+|---|---|
+| `WhitechainSDK` | The extensible host class. Accepts plugins at construction time or dynamically via `.use()`. |
+| `ISDKPlugin` | Interface every plugin must implement: `name`, `version`, and `onInitialize(ctx)`. |
+| `SDKContext` | Read-only view of SDK internals (`publicClient`, `walletClient`, `network`, `logger`) passed to `onInitialize`. |
+| `WhitechainSDKPlugins` | Open interface for TypeScript declaration merging — augment it to add IDE autocomplete for your plugin's namespace. |
+
+### Quick start
+
+```ts
+import { WhitechainSDK, type ISDKPlugin, type SDKContext } from 'whitechain-sdk'
+import { networks } from 'whitechain-sdk'
+
+// 1. Define a plugin
+const marketplacePlugin: ISDKPlugin = {
+  name: 'marketplace',
+  version: '1.0.0',
+  onInitialize(ctx: SDKContext) {
+    return {
+      async buyNFT(tokenId: bigint) {
+        ctx.logger.info(`Purchasing NFT #${tokenId}`)
+        // use ctx.publicClient / ctx.walletClient to call contracts
+      },
+    }
+  },
+}
+
+// 2. Type-augment the SDK (in a .d.ts file or at the top of your plugin package)
+declare module 'whitechain-sdk' {
+  interface WhitechainSDKPlugins {
+    marketplace: { buyNFT(tokenId: bigint): Promise<void> }
+  }
+}
+
+// 3. Create the SDK — plugins are awaited before the factory resolves
+const sdk = await WhitechainSDK.create(
+  { network: networks.whitechainMainnet },
+  [marketplacePlugin],
+)
+
+// 4. Call the plugin — fully typed, IDE autocomplete included
+await sdk.marketplace.buyNFT(42n)
+```
+
+### Passing plugins at construction vs. dynamically
+
+```ts
+// At construction time (recommended)
+const sdk = await WhitechainSDK.create(config, [pluginA, pluginB])
+
+// Dynamically after construction
+await sdk.use(pluginC)
+
+// Chainable
+await sdk.use(pluginD).then(s => s.use(pluginE))
+```
+
+### Accessing SDK internals from a plugin
+
+`onInitialize` receives a frozen `SDKContext` object — the only surface plugins should interact with:
+
+```ts
+const myPlugin: ISDKPlugin = {
+  name: 'myPlugin',
+  version: '0.1.0',
+  onInitialize({ publicClient, walletClient, network, logger }) {
+    logger.info(`Plugin loaded on chain ${network?.chainId}`)
+    return {
+      getBalance: (addr: `0x${string}`) =>
+        publicClient.getBalance({ address: addr }),
+    }
+  },
+}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `publicClient` | `PublicClient` | Always present. Use for reads and `eth_call`. |
+| `walletClient` | `WalletClient \| undefined` | Present only when an `account` was provided to the SDK. |
+| `network` | `NetworkProfile \| undefined` | Chain name, RPC URL, explorer URL, etc. |
+| `logger` | `SDKLogger` | Structured logger — `info`, `warn`, `error`, `debug`. |
+
+### Async initialization
+
+Plugins may perform async work (fetch on-chain config, resolve ENS, etc.) in `onInitialize`. Use `WhitechainSDK.create()` to ensure all hooks are fully settled before the instance is returned:
+
+```ts
+const heavyPlugin: ISDKPlugin = {
+  name: 'heavy',
+  version: '1.0.0',
+  async onInitialize(ctx) {
+    const config = await ctx.publicClient.readContract({ /* ... */ })
+    return { config }
+  },
+}
+
+const sdk = await WhitechainSDK.create(config, [heavyPlugin])
+// sdk.heavy.config is ready here — no race conditions
+```
+
+### Inspecting loaded plugins
+
+```ts
+console.log(sdk.getPlugins())
+// [ { name: 'marketplace', version: '1.0.0' }, ... ]
+```
+
+### Plugin authoring guide
+
+1. Export an object (or class instance) that satisfies `ISDKPlugin`.
+2. Choose a unique `name` — it becomes the property key on the SDK instance. Avoid collisions with `publicClient`, `walletClient`, `network`, `logger`, `use`, and `getPlugins`.
+3. Augment `WhitechainSDKPlugins` in your package's `index.d.ts` so consumers get full IDE support.
+4. Keep the plugin self-contained. Do not import SDK internals directly — only use what `SDKContext` exposes.
+5. The core bundle is **not affected** by external plugins; plugins are loaded lazily at runtime and contribute zero bytes to the base bundle.
+
 ## 🏗️ Design Philosophy
 
 **Omitted By Design** to keep the SDK fast and secure:

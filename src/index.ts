@@ -8,7 +8,6 @@ export * from './constants.js'
 export * from './config/networks.js'
 export * from './network/provider.js'
 export * from './network/BatchProvider.js'
-export { Contract } from './core/Contract.js'
 export * from './core/TransactionHelper.js'
 export { AbiCache, abiCache } from './core/AbiCache.js'
 
@@ -34,6 +33,7 @@ export { TODO } from './types.js'
 export * from './errors/index.js'
 export * from './errors/WhitechainErrors.js'
 export { parseContractError } from './utils/errorHandler.js'
+export * from './storage/index.js'
 
 export {
   Eip1193Provider,
@@ -47,6 +47,17 @@ export {
   type IpcProviderOptions,
 } from './providers/IpcProvider.js'
 
+export {
+  RpcProvider,
+  createRpcProvider,
+  type RpcProviderOptions,
+} from './providers/RpcProvider.js'
+
+export type { RpcProviderConfig } from './types/config.js'
+
+export { Contract, type ContractClient } from './core/Contract.js'
+export { HDWallet, createHDWallet, type HDWalletOptions } from './wallet/HDWallet.js'
+export { Contract, type ContractClient } from './core/Contract.js'
 
 export {
   MockProvider,
@@ -61,3 +72,20 @@ export {
   type Signature,
   type SignerBackend,
 } from './crypto/index.js'
+
+// ---------------------------------------------------------------------------
+// Plugin system
+// ---------------------------------------------------------------------------
+
+export {
+  WhitechainSDK,
+  type WhitechainSDKConfig,
+  type WhitechainSDKPlugins,
+} from './core/WhitechainSDK.js'
+
+export type {
+  ISDKPlugin,
+  SDKContext,
+  SDKLogger,
+  PluginMeta,
+} from './interfaces/ISDKPlugin.js'

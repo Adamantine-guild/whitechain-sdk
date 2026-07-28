@@ -148,6 +148,60 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
     network,
     blockExplorerUrl,
 
+    async submitApplication({ grantId, applicant, metadataUri }) {
+      const wc = requireWallet()
+      const abi = requireGrantAbi()
+      return (wc as any).writeContract({
+        address: addresses.grant,
+        abi,
+        functionName: 'submitApplication',
+        args: [grantId, applicant, metadataUri],
+      })
+    },
+
+    async approveApplication({ applicationId }) {
+      const wc = requireWallet()
+      const abi = requireGrantAbi()
+      return (wc as any).writeContract({
+        address: addresses.grant,
+        abi,
+        functionName: 'approveApplication',
+        args: [applicationId],
+      })
+    },
+
+    async submitMilestoneEvidence({ milestoneId, evidenceUri }) {
+      const wc = requireWallet()
+      const abi = requireGrantAbi()
+      return (wc as any).writeContract({
+        address: addresses.grant,
+        abi,
+        functionName: 'submitMilestoneEvidence',
+        args: [milestoneId, evidenceUri],
+      })
+    },
+
+    async approveMilestone({ milestoneId }) {
+      const wc = requireWallet()
+      const abi = requireGrantAbi()
+      return (wc as any).writeContract({
+        address: addresses.grant,
+        abi,
+        functionName: 'approveMilestone',
+        args: [milestoneId],
+      })
+    },
+
+    async releasePayout({ milestoneId }) {
+      const wc = requireWallet()
+      const abi = requireGrantAbi()
+      return (wc as any).writeContract({
+        address: addresses.grant,
+        abi,
+        functionName: 'releasePayout',
+        args: [milestoneId],
+      })
+    },
     submitApplication: withGasEstimation(
       async ({ grantId, applicant, metadataUri }) => {
         const wc = requireWallet()
@@ -271,6 +325,12 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
       } catch (err) {
         throw parseContractError(err, abi as Abi)
       }
+      const [status, applicationsCount] = (await (publicClient as any).readContract({
+        address: addresses.grant,
+        abi,
+        functionName: 'getGrantRound',
+        args: [grantId],
+      })) as readonly [number, bigint]
       const statusMap: Record<number, GrantRound['status']> = { 0: 'open', 1: 'closed', 2: 'archived' }
       return { id: grantId, status: statusMap[status] ?? 'open', applicationsCount }
     },
@@ -288,6 +348,12 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
       } catch (err) {
         throw parseContractError(err, abi as Abi)
       }
+      const [applicant, status, metadataUri] = (await (publicClient as any).readContract({
+        address: addresses.grant,
+        abi,
+        functionName: 'getGrantApplication',
+        args: [applicationId],
+      })) as readonly [Address, number, string]
       const statusMap: Record<number, 'submitted' | 'approved' | 'rejected'> = {
         0: 'submitted',
         1: 'approved',
@@ -309,6 +375,13 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
       } catch (err) {
         throw parseContractError(err, abi as Abi)
       }
+      const raw = (await (publicClient as any).readContract({
+        address: addresses.grant,
+        abi,
+        functionName: 'getMilestones',
+        args: [applicationId],
+      })) as unknown as Array<readonly [bigint, number, string]>
+      }) as unknown as Array<readonly [bigint, number, string]>
 
       const statusMap: Record<number, Milestone['status']> = {
         0: 'pending',
