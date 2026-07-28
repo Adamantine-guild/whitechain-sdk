@@ -218,6 +218,29 @@ Available scripts for local development:
 - `npm run test` – Run unit tests via Vitest
 - `npm run bench` – Benchmark the WASM vs JS secp256k1 signer (requires `npm run build` first)
 
+### 🧪 Foundry Invariant & Stateful Fuzzing Suite
+
+We utilize [Foundry](https://book.getfoundry.sh/) to perform deep stateful invariant testing on core AMM and Vault smart contracts. The fuzzing suite bombards contracts with random input sequences to ensure critical economic invariants hold true unconditionally across state space transitions.
+
+To run the invariant test suite:
+
+```bash
+forge test --match-path "test/invariants/*"
+```
+
+#### Key Invariants Tested
+
+- **Constant Product Formula (`x * y >= k`)**: Proves that AMM swaps (including 0.3% fee accrual) never decrease total pool constant $k$.
+- **Vault Asset Solvency (`totalShares <= totalAssets`)**: Ensures share minting never exceeds underlying asset reserves.
+- **User Balance Boundary (`userBalance <= totalSupply`)**: Verifies no single user's LP or Vault share balance exceeds overall contract total supply.
+- **Graceful Revert Handling**: Ensures zero-amount swap attempts and invalid inputs revert gracefully without breaking stateful fuzz runs.
+
+#### Configuration (`foundry.toml`)
+
+- **Runs**: 10,000 random input sequences per invariant.
+- **Depth**: 500 call transitions per run.
+- **Revert Policy**: `fail_on_revert = false` (handled via stateful `Handler.sol`).
+
 ## 🤝 Contributing
 
 We strongly believe in open-source and welcome contributions from the community!
