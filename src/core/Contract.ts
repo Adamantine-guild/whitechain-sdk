@@ -2,6 +2,7 @@ import type { Address, PublicClient, WalletClient, Hash } from 'viem'
 import type { Abi, ExtractAbiFunctionNames, ExtractAbiFunction, AbiParametersToPrimitiveTypes, AbiStateMutability } from 'abitype'
 import { ValidationError } from '../errors/index.js'
 import { parseContractError } from '../utils/errorHandler.js'
+import { NetworkContext, NetworkObserver, NetworkState } from './NetworkContext.js'
 
 type Prettify<T> = {
   [K in keyof T]: T[K]
@@ -37,13 +38,39 @@ type ExtractReturnType<
 
 export class Contract<
   TAbi extends Abi | readonly unknown[] = Abi,
-> {
+> implements NetworkObserver {
+  public publicClient?: PublicClient;
+  public walletClient?: WalletClient;
+  public address: Address;
+
   constructor(
-    public readonly address: Address,
+    address: Address,
     public readonly abi: TAbi,
-    public readonly publicClient?: PublicClient,
-    public readonly walletClient?: WalletClient,
-  ) {}
+    publicClientOrContext?: PublicClient | NetworkContext,
+    walletClient?: WalletClient,
+    public readonly addressKey?: string
+  ) {
+    this.address = address;
+    
+    if (publicClientOrContext instanceof NetworkContext) {
+      publicClientOrContext.subscribe(this);
+    } else {
+      this.publicClient = publicClientOrContext;
+      this.walletClient = walletClient;
+    }
+  }
+
+  onNetworkChanged(state: NetworkState) {
+    this.publicClient = state.publicClient;
+    this.walletClient = state.walletClient;
+    if (this.addressKey && state.addresses[this.addressKey]) {
+      this.address = state.addresses[this.addressKey];
+    }
+  }
+
+  destroy(context: NetworkContext) {
+    context.unsubscribe(this);
+  }
 
   /**
    * Strongly typed wrapper for publicClient.readContract

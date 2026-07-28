@@ -10,6 +10,7 @@ export * from './network/provider.js'
 export * from './network/BatchProvider.js'
 export { Contract } from './core/Contract.js'
 export * from './core/TransactionHelper.js'
+export { NetworkContext, type NetworkObserver, type NetworkState } from './core/NetworkContext.js'
 export { AbiCache, abiCache } from './core/AbiCache.js'
 
 export type {

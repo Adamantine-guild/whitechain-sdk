@@ -10,9 +10,9 @@ export type WithGasEstimation<TParams, TReturn = Hash> = {
 
 export function withGasEstimation<TParams>(
   fn: (params: TParams) => Promise<Hash>,
-  publicClient: any,
-  address: Address,
-  abi: Abi,
+  getPublicClient: () => any,
+  getAddress: () => Address,
+  getAbi: () => Abi,
   functionName: string,
   argsMapper: (params: TParams) => any[],
   defaultMultiplier: number = 1.2
@@ -22,14 +22,14 @@ export function withGasEstimation<TParams>(
       const multiplier = options?.multiplier ?? defaultMultiplier;
       let baseGas: bigint;
       try {
-        baseGas = await (publicClient as any).estimateContractGas({
-          address,
-          abi,
+        baseGas = await (getPublicClient() as any).estimateContractGas({
+          address: getAddress(),
+          abi: getAbi(),
           functionName,
           args: argsMapper(params),
         });
       } catch (err) {
-        throw parseContractError(err, abi);
+        throw parseContractError(err, getAbi());
       }
       // apply buffer (pad by multiplier)
       return (baseGas * BigInt(Math.floor(multiplier * 100))) / 100n;
