@@ -152,55 +152,60 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
       const wc = requireWallet()
       const abi = requireGrantAbi()
       return (wc as any).writeContract({
+        chain: config.chain as any,
         address: addresses.grant,
         abi,
         functionName: 'submitApplication',
         args: [grantId, applicant, metadataUri],
-      })
+      } as any)
     },
 
     async approveApplication({ applicationId }) {
       const wc = requireWallet()
       const abi = requireGrantAbi()
       return (wc as any).writeContract({
+        chain: config.chain as any,
         address: addresses.grant,
         abi,
         functionName: 'approveApplication',
         args: [applicationId],
-      })
+      } as any)
     },
 
     async submitMilestoneEvidence({ milestoneId, evidenceUri }) {
       const wc = requireWallet()
       const abi = requireGrantAbi()
       return (wc as any).writeContract({
+        chain: config.chain as any,
         address: addresses.grant,
         abi,
         functionName: 'submitMilestoneEvidence',
         args: [milestoneId, evidenceUri],
-      })
+      } as any)
     },
 
     async approveMilestone({ milestoneId }) {
       const wc = requireWallet()
       const abi = requireGrantAbi()
       return (wc as any).writeContract({
+        chain: config.chain as any,
         address: addresses.grant,
         abi,
         functionName: 'approveMilestone',
         args: [milestoneId],
-      })
+      } as any)
     },
 
     async releasePayout({ milestoneId }) {
       const wc = requireWallet()
       const abi = requireGrantAbi()
       return (wc as any).writeContract({
+        chain: config.chain as any,
         address: addresses.grant,
         abi,
         functionName: 'releasePayout',
         args: [milestoneId],
-      })
+      } as any)
     },
     submitApplication: withGasEstimation(
       async ({ grantId, applicant, metadataUri }) => {
