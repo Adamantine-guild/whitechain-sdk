@@ -116,6 +116,8 @@ const defaultTransport = http()
  * client — calling a write method on it throws a {@link WhiteChainError}.
  */
 export function createWhiteChainClient(config: WhiteChainConfig & { provider?: any }): WhiteChainClient {
+  const network = config.network
+  const blockExplorerUrl = config.blockExplorerUrl ?? network?.blockExplorerUrl
   const initialNetwork = config.network
   const blockExplorerUrl = config.blockExplorerUrl ?? initialNetwork?.blockExplorerUrl
   const transport =

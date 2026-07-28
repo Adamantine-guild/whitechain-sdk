@@ -15,6 +15,15 @@ export {
   type FormattedStakingState,
 } from './components/staking/StakingForm.js'
 
+export {
+  HistoricalSync,
+  getLogsChunked,
+  type HistoricalSyncOptions,
+  type ProgressInfo,
+  type RawLog,
+  type LogFilter,
+} from './services/HistoricalSync.js'
+
 export { toChecksumAddress, isAddress, assertChecksumAddress } from './utils/address.js'
 export * from './constants.js'
 export * from './config/networks.js'
