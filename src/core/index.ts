@@ -1,3 +1,4 @@
+export { Contract } from './Contract.js'
 export { Contract, type ContractClient } from './Contract.js'
 export { DynamicContract } from './DynamicContract.js'
 export { TransactionHelper } from './TransactionHelper.js'
