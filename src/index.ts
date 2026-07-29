@@ -88,6 +88,17 @@ export type { RpcProviderConfig } from './types/config.js'
 export { Contract, type ContractClient } from './core/Contract.js'
 export { HDWallet, createHDWallet, type HDWalletOptions } from './wallet/HDWallet.js'
 export {
+  Multicall,
+  createMulticall,
+  DEFAULT_MULTICALL3_ADDRESS,
+  encodeAggregate3,
+  decodeAggregate3Results,
+} from './core/Multicall.js'
+export type {
+  Multicall3Call,
+  Multicall3CallResult,
+  Multicall3Options,
+} from './types/multicall.js'
   Contract,
   type ContractClient,
   ContractWrapper,
