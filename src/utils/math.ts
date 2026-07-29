@@ -1,3 +1,5 @@
+import { ValidationError } from '../errors/index.js'
+
 /**
  * Utility functions for formatting and parsing big integer token amounts.
  * These functions avoid floating point arithmetic to retain full precision.
@@ -13,7 +15,7 @@
  * Example: formatUnits(1000000000000000000n, 18) => "1.0"
  */
 export function formatUnits(value: bigint, decimals: number): string {
-  if (decimals < 0) throw new Error('decimals must be non‑negative')
+  if (decimals < 0) throw new ValidationError('decimals must be non‑negative')
   const raw = value.toString(10)
   
   const isNegative = raw.startsWith('-')
@@ -41,8 +43,8 @@ export function formatUnits(value: bigint, decimals: number): string {
  * Example: parseUnits('1.0', 18) => 1000000000000000000n
  */
 export function parseUnits(value: string, decimals: number): bigint {
-  if (decimals < 0) throw new Error('decimals must be non‑negative')
-  if (!value) throw new Error('value must be a non‑empty string')
+  if (decimals < 0) throw new ValidationError('decimals must be non‑negative')
+  if (!value) throw new ValidationError('value must be a non‑empty string')
   
   const isNegative = value.startsWith('-')
   const absValue = isNegative ? value.slice(1) : value

@@ -1,4 +1,5 @@
 import type { NetworkProfile } from '../config/networks.js'
+import { ValidationError, RpcError } from '../errors/index.js'
 
 export interface BatchProviderOptions {
   rpcUrl?: string
@@ -79,14 +80,14 @@ export class BatchProvider {
         this.maxBatchSize = 100
         this._fetchFn = globalThis.fetch
       } else {
-        throw new Error('Invalid RPC URL or NetworkProfile provided to BatchProvider')
+        throw new ValidationError('Invalid RPC URL or NetworkProfile provided to BatchProvider')
       }
     } else {
-      throw new Error('Invalid RPC URL or NetworkProfile provided to BatchProvider')
+      throw new ValidationError('Invalid RPC URL or NetworkProfile provided to BatchProvider')
     }
 
     if (!this.rpcUrl) {
-      throw new Error('RPC URL is required for BatchProvider')
+      throw new ValidationError('RPC URL is required for BatchProvider')
     }
   }
 
@@ -157,8 +158,9 @@ export class BatchProvider {
       })
 
       if (!response.ok) {
-        const errorMsg = `HTTP Error ${response.status}: ${response.statusText}`
-        itemsToFlush.forEach((item) => item.reject(new Error(errorMsg)))
+        const body = typeof response.text === 'function' ? await response.text().catch(() => '') : undefined
+        const err = new RpcError(`HTTP Error ${response.status}: ${response.statusText}`, response.status, body)
+        itemsToFlush.forEach((item) => item.reject(err))
         return
       }
 
@@ -175,7 +177,7 @@ export class BatchProvider {
         if (!item) continue
 
         if (res.error) {
-          item.reject(new Error(`JSON-RPC Error [${res.error.code}]: ${res.error.message}`))
+          item.reject(new RpcError(`JSON-RPC Error [${res.error.code}]: ${res.error.message}`, res.error.code, res.error.data))
         } else {
           item.resolve(res.result)
         }
@@ -183,7 +185,7 @@ export class BatchProvider {
 
       for (const item of itemsToFlush) {
         if (!receivedIds.has(item.id)) {
-          item.reject(new Error(`No response received for request ID ${item.id}`))
+          item.reject(new RpcError(`No response received for request ID ${item.id}`))
         }
       }
     } catch (err) {
