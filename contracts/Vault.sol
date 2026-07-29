@@ -6,6 +6,7 @@ import "./libraries/MathUtils.sol";
 /**
  * @title Vault
  * @notice Yield compounding Vault utilizing Yul-optimized MathUtils.mulDiv for high-precision, low-gas fixed-point math.
+ * @dev Rejects plain accidental native token (ETH) transfers while allowing authorized unwrapping/deposit mechanisms.
  */
 contract Vault {
     using MathUtils for uint256;
@@ -17,15 +18,34 @@ contract Vault {
     uint256 public totalAssets;
     uint256 public totalSupply;
 
+    address public immutable weth;
+    address public authorizedUnwrapper;
+
     mapping(address => uint256) public balanceOf;
 
     event Deposit(address indexed caller, address indexed owner, uint256 assets, uint256 shares);
     event Withdraw(address indexed caller, address indexed receiver, address indexed owner, uint256 assets, uint256 shares);
     event Rebalanced(uint256 previousAssets, uint256 newAssets, uint256 yieldCompounded);
 
-    constructor(string memory _name, string memory _symbol) {
+    constructor(string memory _name, string memory _symbol, address _weth, address _authorizedUnwrapper) {
         name = _name;
         symbol = _symbol;
+        weth = _weth;
+        authorizedUnwrapper = _authorizedUnwrapper;
+    }
+
+    /**
+     * @notice Reject plain accidental ETH transfers. Accepts ETH ONLY from authorized WETH or unwrapping mechanisms.
+     */
+    receive() external payable {
+        require(
+            msg.sender == weth || msg.sender == authorizedUnwrapper,
+            "Vault: direct ETH transfers disabled to prevent trapped funds"
+        );
+    }
+
+    fallback() external payable {
+        revert("Vault: fallback function disabled");
     }
 
     /**
@@ -60,6 +80,20 @@ contract Vault {
         balanceOf[receiver] += shares;
 
         emit Deposit(msg.sender, receiver, assets, shares);
+    }
+
+    /**
+     * @notice Intentionally deposit native ETH into the Vault.
+     */
+    function depositETH(address receiver) external payable returns (uint256 shares) {
+        require(msg.value > 0, "Vault: zero ETH");
+        shares = convertToShares(msg.value);
+
+        totalAssets += msg.value;
+        totalSupply += shares;
+        balanceOf[receiver] += shares;
+
+        emit Deposit(msg.sender, receiver, msg.value, shares);
     }
 
     /**
