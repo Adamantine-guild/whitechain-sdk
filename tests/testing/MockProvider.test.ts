@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import { MockProvider, returns } from '../../src/testing/MockProvider'
 import { MockProvider, returns } from '../../src/testing/MockProvider.js'
 
 describe('MockProvider', () => {

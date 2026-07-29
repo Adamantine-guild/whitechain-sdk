@@ -1,6 +1,7 @@
 import { http, type Transport } from 'viem'
 import type { WhiteChainConfig, WhiteChainAddresses } from '../types.js'
 import type { NetworkProfile } from '../config/networks.js'
+import { ValidationError } from '../errors/index.js'
 import { TimeoutError, ValidationError } from '../errors/index.js'
 
 type RateLimitListener = () => void

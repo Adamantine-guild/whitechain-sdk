@@ -39,6 +39,7 @@ export * from './constants.js'
 export * from './config/networks.js'
 export * from './network/provider.js'
 export * from './network/BatchProvider.js'
+export { Contract } from './core/Contract.js'
 export * from './core/TransactionHelper.js'
 export { NetworkContext, type NetworkObserver, type NetworkState } from './core/NetworkContext.js'
 export { AbiCache, abiCache } from './core/AbiCache.js'
@@ -63,6 +64,8 @@ export type {
 
 export { TODO } from './types.js'
 export * from './errors/index.js'
+export * from './storage/index.js'
+export * from './zk/index.js'
 export * from './errors/WhitechainErrors.js'
 export { parseContractError } from './utils/errorHandler.js'
 export * from './storage/index.js'
@@ -87,6 +90,9 @@ export {
 } from './providers/IpcProvider.js'
 
 export {
+  MockProvider,
+  returns,
+} from './testing/MockProvider.js'
   RpcProvider,
   createRpcProvider,
   type RpcProviderOptions,

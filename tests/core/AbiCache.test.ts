@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { AbiCache } from '../../src/core/AbiCache'
 import { AbiCache } from '../../src/core/AbiCache.js'
 import type { Abi } from 'viem'
 

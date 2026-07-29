@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
+import { Contract } from '../../src/core/Contract'
 import { Contract } from '../../src/core/Contract.js'
 import { describe, expect, it, vi } from 'vitest'
 import { Contract } from '../../src/core/Contract.js'
@@ -120,6 +121,7 @@ const mockAbi = [
   },
 ] as const
 
+describe('Contract', () => {
 describe('Contract — read() / write()', () => {
   it('calls readContract on publicClient for view functions', async () => {
     const publicClient = {
@@ -127,6 +129,10 @@ describe('Contract — read() / write()', () => {
     } as any
 
     const contract = new Contract('0x1234567890123456789012345678901234567890', mockAbi, publicClient)
+    
+    // Type checking ensures 'balanceOf' and ['0x...'] are required
+    const result = await contract.read('balanceOf', ['0xabcdef1234567890abcdef1234567890abcdef12'])
+    
 
     const result = await contract.read('balanceOf', ['0xabcdef1234567890abcdef1234567890abcdef12'])
 
@@ -145,6 +151,10 @@ describe('Contract — read() / write()', () => {
     } as any
 
     const contract = new Contract('0x1234567890123456789012345678901234567890', mockAbi, undefined, walletClient)
+    
+    // Type checking ensures 'transfer' and correct arguments are required
+    const result = await contract.write('transfer', ['0xabcdef1234567890abcdef1234567890abcdef12', 50n])
+    
 
     const result = await contract.write('transfer', ['0xabcdef1234567890abcdef1234567890abcdef12', 50n])
 
@@ -156,6 +166,10 @@ describe('Contract — read() / write()', () => {
       args: ['0xabcdef1234567890abcdef1234567890abcdef12', 50n],
     })
   })
+
+  it('throws if clients are missing', async () => {
+    const contract = new Contract('0x1234567890123456789012345678901234567890', mockAbi)
+    
   it('throws if clients are missing', async () => {
     const contract = new Contract('0x1234567890123456789012345678901234567890', mockAbi)
 

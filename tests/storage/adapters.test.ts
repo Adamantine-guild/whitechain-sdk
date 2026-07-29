@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { PinataAdapter, NFTStorageAdapter } from '../../src/storage/adapters'
+import { RpcError } from '../../src/errors'
 import { PinataAdapter, NFTStorageAdapter } from '../../src/storage/adapters/index.js'
 import { RpcError } from '../../src/errors/index.js'
 

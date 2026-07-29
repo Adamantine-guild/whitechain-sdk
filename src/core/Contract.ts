@@ -1,3 +1,6 @@
+import type { Address, PublicClient, WalletClient, Hash } from 'viem'
+import type { Abi, ExtractAbiFunctionNames, ExtractAbiFunction, AbiParametersToPrimitiveTypes, AbiStateMutability } from 'abitype'
+import { ValidationError } from '../errors/index.js'
 import type { Abi, Address, PublicClient } from 'viem'
 import { WhiteChainError } from '../types.js'
 import type { Address, PublicClient, WalletClient, Hash } from 'viem'
@@ -106,6 +109,9 @@ export class Contract<
     public readonly publicClient?: PublicClient,
     public readonly walletClient?: WalletClient,
   ) {}
+
+  /**
+   * Strongly typed wrapper for publicClient.readContract
 /**
  * Representation of a deployed smart contract bound to an address, ABI, and optional clients.
  *
@@ -222,6 +228,16 @@ export class Contract<
 
     const _args = args.length > 0 ? (args[0] as unknown[]) : []
 
+    return (this.publicClient as any).readContract({
+      address: this.address,
+      abi: this.abi,
+      functionName,
+      args: _args,
+    })
+  }
+
+  /**
+   * Strongly typed wrapper for walletClient.writeContract
     try {
       return await (this.publicClient as any).readContract({
         address: this.address,
@@ -250,6 +266,12 @@ export class Contract<
 
     const _args = args.length > 0 ? (args[0] as unknown[]) : []
 
+    return (this.walletClient as any).writeContract({
+      address: this.address,
+      abi: this.abi,
+      functionName,
+      args: _args,
+    })
     try {
       return await (this.walletClient as any).writeContract({
         address: this.address,

@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest'
+import { toChecksumAddress, isAddress, assertChecksumAddress } from '../../src/utils/address'
+import { ValidationError } from '../../src/errors'
 import { toChecksumAddress, isAddress, assertChecksumAddress } from '../../src/utils/address.js'
 import { ValidationError } from '../../src/errors/index.js'
 
