@@ -7,12 +7,22 @@ describe('TransactionHelper', () => {
 
   beforeEach(() => {
     fetchFn = vi.fn();
+    helper = new TransactionHelper(fetchFn as unknown as import("../../src/core/TransactionHelper.js").RpcFetchFn);
+import { TransactionHelper, type RpcFetchFn } from '../../src/core/TransactionHelper.js';
+
+describe('TransactionHelper', () => {
+  let fetchFn: RpcFetchFn;
+  let helper: TransactionHelper;
+
+  beforeEach(() => {
+    fetchFn = vi.fn() as unknown as RpcFetchFn;
     helper = new TransactionHelper(fetchFn);
   });
 
   it('estimates gas and applies the default 1.2x buffer correctly', async () => {
     // 100,000 raw estimate
     fetchFn.mockResolvedValue('0x186a0');
+    (fetchFn as any).mockResolvedValue('0x186a0');
 
     const tx = { to: '0x123', value: '0x0' };
     const result = await helper.estimateGas(tx);
@@ -26,6 +36,7 @@ describe('TransactionHelper', () => {
   it('allows overriding the multiplier on a per-call basis', async () => {
     // 100,000 raw estimate
     fetchFn.mockResolvedValue('0x186a0');
+    (fetchFn as any).mockResolvedValue('0x186a0');
 
     const tx = { to: '0x123', value: '0x0' };
     const result = await helper.estimateGas(tx, { multiplier: 1.5 });
@@ -37,6 +48,7 @@ describe('TransactionHelper', () => {
   it('allows setting a global default multiplier', async () => {
     // 100,000 raw estimate
     fetchFn.mockResolvedValue('0x186a0');
+    (fetchFn as any).mockResolvedValue('0x186a0');
     
     helper.setDefaultMultiplier(1.1);
 
@@ -50,6 +62,7 @@ describe('TransactionHelper', () => {
   it('handles gas estimates with precision multipliers properly', async () => {
     // 21,000 raw estimate (standard transfer)
     fetchFn.mockResolvedValue('0x5208');
+    (fetchFn as any).mockResolvedValue('0x5208');
 
     const tx = { to: '0x123', value: '0x0' };
     const result = await helper.estimateGas(tx, { multiplier: 1.05 }); // 5% buffer
@@ -60,6 +73,7 @@ describe('TransactionHelper', () => {
 
   it('throws an error if a multiplier less than 1 is provided', async () => {
     fetchFn.mockResolvedValue('0x186a0');
+    (fetchFn as any).mockResolvedValue('0x186a0');
     const tx = { to: '0x123', value: '0x0' };
 
     await expect(helper.estimateGas(tx, { multiplier: 0.9 })).rejects.toThrow('Multiplier must be at least 1.0');
@@ -69,6 +83,7 @@ describe('TransactionHelper', () => {
 
   it('throws an error if the RPC response is invalid', async () => {
     fetchFn.mockResolvedValue(null);
+    (fetchFn as any).mockResolvedValue(null);
     const tx = { to: '0x123' };
 
     await expect(helper.estimateGas(tx)).rejects.toThrow('Invalid response from eth_estimateGas');
