@@ -1,4 +1,5 @@
 export { formatUnits, parseUnits } from './math.js'
+export { formatBigIntToString, type BigIntToString } from './formatters.js'
 export {
   signERC20Permit,
   splitSignature,
