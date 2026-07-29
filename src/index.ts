@@ -3,6 +3,15 @@ export {
   type WhiteChainClient,
 } from './client.js'
 export { formatUnits, parseUnits } from './utils/math.js'
+export {
+  signERC20Permit,
+  splitSignature,
+  EIP2612_PERMIT_TYPES,
+  type SignERC20PermitOptions,
+  type ERC20PermitSignature,
+  type EIP2612Domain,
+  type PermitTypes,
+} from './utils/permit.js'
 
 export {
   HistoricalSync,
@@ -57,17 +66,8 @@ export {
 
 export type { RpcProviderConfig } from './types/config.js'
 
-export { Contract, type ContractClient } from './core/Contract.js'
-export { HDWallet, createHDWallet, type HDWalletOptions } from './wallet/HDWallet.js'
 export {
-  Multicall,
-  createMulticall,
-  DEFAULT_MULTICALL3_ADDRESS,
-  encodeAggregate3,
-  decodeAggregate3Results,
-} from './core/Multicall.js'
-export type {
-  Multicall3Call,
-  Multicall3CallResult,
-  Multicall3Options,
-} from './types/multicall.js'
+  Contract,
+  type ContractClient,
+} from './core/index.js'
+export { HDWallet, createHDWallet, type HDWalletOptions } from './wallet/HDWallet.js'
