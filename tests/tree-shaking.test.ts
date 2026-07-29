@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import fs from 'fs'
 import path from 'path'
+// @ts-ignore - requires `npm run build` first
 import { formatUnits as formatUnitsEsm, parseUnits as parseUnitsEsm } from '../dist/esm/utils/index.js'
 // @ts-ignore - test CJS import
 import * as cjsUtils from '../dist/cjs/utils/index.js'
