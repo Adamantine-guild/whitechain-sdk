@@ -3,7 +3,11 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "outDir": "dist/esm"
+    "outDir": "dist/esm",
+    "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+  "include": ["src", "cli"],
+  "exclude": ["node_modules", "dist", "cli/templates"]
 }

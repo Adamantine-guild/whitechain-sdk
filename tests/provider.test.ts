@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { Provider } from '../src/network/provider.js'
+import { Provider, createProvider } from '../src/network/provider.js'
 import { whitechainTestnet } from '../src/config/networks.js'
 
-describe('Provider', () => {
+describe('Provider Exponential Backoff & 429 Retry', () => {
   let originalFetch: typeof globalThis.fetch
 
   beforeEach(() => {
@@ -13,38 +13,84 @@ describe('Provider', () => {
     globalThis.fetch = originalFetch
   })
 
-  it('emits rateLimit event on 429 response and continues', async () => {
-    const provider = new Provider(whitechainTestnet)
+  it('emits rateLimit event, retries with exponential backoff on 429, and succeeds on subsequent 200', async () => {
+    const provider = new Provider(whitechainTestnet, { maxRetries: 3, baseDelayMs: 10 })
     let callCount = 0
 
-    // Mock fetch to return 429 on first call, 200 on second call
-    globalThis.fetch = vi.fn().mockImplementation(async () => {
+    const mockFetch = vi.fn().mockImplementation(async () => {
       callCount++
-      if (callCount === 1) {
+      if (callCount <= 2) {
         return new Response('Too Many Requests', { status: 429 })
       }
-      return new Response(JSON.stringify({ result: 'success' }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      return new Response(JSON.stringify({ jsonrpc: '2.0', id: 1, result: '0x123' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
     })
+
+    globalThis.fetch = mockFetch
 
     const rateLimitListener = vi.fn()
     provider.on('rateLimit', rateLimitListener)
 
-    // Call the viem transport directly to simulate a request.
-    // Viem's http transport wraps our custom fetch and handles exponential backoff.
-    // The transport function returns a function when called with an RPC URL, but in Viem's `Transport` type it's an object with a `request` method if initialized by a client,
-    // or it's a function that takes `{ chain }` and returns `{ request }`.
-    
-    // We can just invoke our custom fetch via the fetchOptions injected by `http()` transport?
-    // Wait, the easiest way to test this without instantiating a whole viem client is to just call `transport` function.
-    // Viem's http() returns a Transport function: `(config) => TransportConfig`
-    const transportConfig = provider.transport({ chain: undefined })
+    const transportConfig = provider.transport({ chain: undefined, retryCount: 0 })
     const request = transportConfig.request
-    
-    // We simulate a basic RPC request
+
     const response = await request({ method: 'eth_blockNumber', params: [] })
 
+    expect(callCount).toBe(3) // 2 retries (429) + 1 success (200)
+    expect(rateLimitListener).toHaveBeenCalledTimes(2)
+    expect(response).toBe('0x123')
+  })
+
+  it('stops retrying when maxRetries is reached and rejects', async () => {
+    const provider = createProvider(whitechainTestnet, { maxRetries: 2, baseDelayMs: 10 })
+    let callCount = 0
+
+    const mockFetch = vi.fn().mockImplementation(async () => {
+      callCount++
+      return new Response('Too Many Requests', { status: 429 })
+    })
+
+    globalThis.fetch = mockFetch
+
+    const rateLimitListener = vi.fn()
+    provider.on('rateLimit', rateLimitListener)
+
+    const transportConfig = provider.transport({ chain: undefined, retryCount: 0 })
+
+    await expect(transportConfig.request({ method: 'eth_blockNumber', params: [] })).rejects.toThrow(
+      'HTTP 429 Rate limit exceeded after 2 retries'
+    )
+
+    expect(callCount).toBe(3) // Initial call + 2 retries = 3 total calls
+    expect(rateLimitListener).toHaveBeenCalledTimes(3)
+  })
+
+  it('polls for a transaction receipt until it is available', async () => {
+    const provider = new Provider(whitechainTestnet)
+    const receipt = { transactionHash: '0xabc', status: '0x1' }
+    let callCount = 0
+
+    globalThis.fetch = vi.fn().mockImplementation(async () => {
+      callCount++
+      return new Response(JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        result: callCount === 1 ? null : receipt,
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+    })
+
+    const result = await provider.waitForTransaction('0xabc', { intervalMs: 1 })
+
+    expect(result).toEqual(receipt)
     expect(callCount).toBe(2)
-    expect(rateLimitListener).toHaveBeenCalledTimes(1)
-    expect(response).toBe('success')
+    expect(globalThis.fetch).toHaveBeenLastCalledWith(
+      whitechainTestnet.rpcUrl,
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining('eth_getTransactionReceipt'),
+      }),
+    )
   })
 })
