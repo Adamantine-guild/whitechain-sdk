@@ -117,17 +117,17 @@ export type ReleasePayoutParams = {
 /** On-chain state of a grant round, as returned by {@link WhiteChainClient}.`getGrantRound`. */
 export type GrantRound = {
   /** The grant round's identifier (echoed back from the request). */
-  id: GrantId
+  id: string
   /** Current lifecycle state of the round. */
   status: 'open' | 'closed' | 'archived'
   /** Number of applications submitted to this round. */
-  applicationsCount: bigint
+  applicationsCount: string
 }
 
 /** On-chain state of a grant application, as returned by {@link WhiteChainClient}.`getGrantApplication`. */
 export type GrantApplication = {
   /** The application's identifier (echoed back from the request). */
-  id: ApplicationId
+  id: string
   /** Address that submitted the application. */
   applicant: Address
   /** Current review state of the application. */
@@ -139,7 +139,7 @@ export type GrantApplication = {
 /** On-chain state of a milestone, as returned by {@link WhiteChainClient}.`getMilestones`. */
 export type Milestone = {
   /** The milestone's identifier. */
-  id: MilestoneId
+  id: string
   /** Current lifecycle state of the milestone. */
   status: 'pending' | 'evidence-submitted' | 'approved' | 'paid'
   /** URI of the submitted evidence, if any has been submitted yet. */

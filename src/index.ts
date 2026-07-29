@@ -3,6 +3,7 @@ export {
   type WhiteChainClient,
 } from './client.js'
 export { formatUnits, parseUnits } from './utils/math.js'
+export { formatBigIntToString, type BigIntToString } from './utils/formatters.js'
 export {
   signERC20Permit,
   splitSignature,

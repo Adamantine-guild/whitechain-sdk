@@ -13,6 +13,7 @@ import {
 } from './types.js'
 import { WhiteChainError, ValidationError } from './errors/index.js'
 import { parseContractError } from './utils/errorHandler.js'
+import { formatBigIntToString } from './utils/formatters.js'
 import { networks, type NetworkProfile } from './config/networks.js'
 import { Eip1193Provider } from './providers/BrowserProvider.js'
 import { withGasEstimation, type WithGasEstimation } from './core/TransactionHelper.js'
@@ -433,7 +434,11 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
         args: [grantId],
       })) as readonly [number, bigint]
       const statusMap: Record<number, GrantRound['status']> = { 0: 'open', 1: 'closed', 2: 'archived' }
-      return { id: grantId, status: statusMap[status] ?? 'open', applicationsCount }
+      return formatBigIntToString({
+        id: grantId,
+        status: statusMap[status] ?? 'open',
+        applicationsCount,
+      } satisfies { id: bigint; status: GrantRound['status']; applicationsCount: bigint })
     },
 
     async getGrantApplication(applicationId) {
@@ -466,7 +471,17 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
         1: 'approved',
         2: 'rejected',
       }
-      return { id: applicationId, applicant, status: statusMap[status] ?? 'submitted', metadataUri }
+      return formatBigIntToString({
+        id: applicationId,
+        applicant,
+        status: statusMap[status] ?? 'submitted',
+        metadataUri,
+      } satisfies {
+        id: bigint
+        applicant: Address
+        status: GrantApplication['status']
+        metadataUri: string
+      })
     },
 
     async getMilestones(applicationId) {
@@ -503,11 +518,17 @@ export function createWhiteChainClient(config: WhiteChainConfig & { provider?: a
         3: 'paid',
       }
 
-      return raw.map(([id, status, evidenceUri]) => ({
+      const milestones: Array<{
+        id: bigint
+        status: Milestone['status']
+        evidenceUri: string | undefined
+      }> = raw.map(([id, status, evidenceUri]) => ({
         id,
         status: statusMap[status] ?? 'pending',
         evidenceUri: evidenceUri || undefined,
       }))
+
+      return formatBigIntToString(milestones)
     },
   }
 }

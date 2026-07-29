@@ -89,16 +89,19 @@ describe('WhiteChainClient', () => {
     })
 
     const round = await client.getGrantRound(10n)
-    expect(round).toEqual({ id: 10n, status: 'closed', applicationsCount: 5n })
+    expect(round).toEqual({ id: '10', status: 'closed', applicationsCount: '5' })
+    expect(() => JSON.stringify(round)).not.toThrow()
 
     const app = await client.getGrantApplication(3n)
-    expect(app).toEqual({ id: 3n, applicant: grantAddress, status: 'submitted', metadataUri: 'ipfs://meta' })
+    expect(app).toEqual({ id: '3', applicant: grantAddress, status: 'submitted', metadataUri: 'ipfs://meta' })
+    expect(() => JSON.stringify(app)).not.toThrow()
 
     const milestones = await client.getMilestones(3n)
     expect(milestones).toEqual([
-      { id: 1n, status: 'approved', evidenceUri: 'ipfs://e1' },
-      { id: 2n, status: 'paid', evidenceUri: undefined },
+      { id: '1', status: 'approved', evidenceUri: 'ipfs://e1' },
+      { id: '2', status: 'paid', evidenceUri: undefined },
     ])
+    expect(() => JSON.stringify(milestones)).not.toThrow()
   })
 
   it('updates clients dynamically when switchNetwork is called', async () => {
@@ -117,4 +120,3 @@ describe('WhiteChainClient', () => {
     expect(client.publicClient).not.toBe(originalPublicClient)
   })
 })
-
