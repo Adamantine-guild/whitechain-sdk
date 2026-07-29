@@ -85,6 +85,8 @@ export {
 
 export type { RpcProviderConfig } from './types/config.js'
 
+export { Contract, type ContractClient } from './core/Contract.js'
+export { HDWallet, createHDWallet, type HDWalletOptions } from './wallet/HDWallet.js'
 export {
   Contract,
   type ContractClient,
