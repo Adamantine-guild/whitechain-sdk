@@ -144,6 +144,43 @@ All fields are validated locally and strictly: private key format/length, `chain
 
 `OfflineSigner` guarantees that the **signing step itself** performs no network I/O — that guarantee is enforced in code and covered by tests. It **cannot** guarantee the security of anything around that step: the operating system on the air-gapped machine, the removable media used to move data across the gap, how or where the private key is generated and stored, or the physical transfer process. Those remain entirely your responsibility. Treat the offline machine as if it will eventually be compromised, and design your key-management practices accordingly.
 
+## 🌉 Cross-Chain State Proof Verifier
+
+`whitechain-sdk/crypto` also exposes a local verifier for Ethereum [EIP-1186](https://eips.ethereum.org/EIPS/eip-1186) account and storage proofs — the Merkle Patricia Trie proofs a cross-chain bridge uses to prove "this account/storage slot had this value" against a specific chain state, without trusting the node that served the data.
+
+**Verified against a `stateRoot`, never a block hash.** A block hash identifies a block; it is not itself a trie root. Callers must supply the block's trusted `stateRoot` explicitly (e.g. from a header they've already verified elsewhere) — this module never fetches a block header and has no parameter slot for a block hash in its place.
+
+**Zero network dependencies, by construction, same as `OfflineSigner`:** verification runs entirely over the proof data you already have in hand (typically the result of an `eth_getProof` call made elsewhere). There is no RPC, HTTP, provider, transport, walletClient, or publicClient involved — never `fetch`, never a viem client action. This is enforced in code and covered by the same style of static + runtime network-stubbing tests as `OfflineSigner`.
+
+```ts
+import { verifyEIP1186Proof, isValidStateProof } from 'whitechain-sdk/crypto'
+
+// `proof` is the (unmodified) result of an `eth_getProof` JSON-RPC call —
+// fetched by your own RPC client, wherever that lives; this function never
+// makes that call itself.
+const proof = await publicClient.request({
+  method: 'eth_getProof',
+  params: [address, [storageSlot], blockNumber],
+})
+
+// `stateRoot` must come from a source you trust independently — e.g. a
+// block header you've already validated (its `stateRoot` field), not from
+// the same untrusted RPC response you're trying to verify.
+const result = verifyEIP1186Proof(trustedStateRoot, proof)
+
+if (result.valid) {
+  // result.account and result.storageProofs[i].result each carry
+  // `{ valid: true, kind: 'inclusion' | 'exclusion' }` — an exclusion
+  // result proves the account/slot is *absent*, which is just as
+  // meaningful to a bridge as a proven value.
+}
+
+// Or, if you only need a pass/fail:
+const ok = isValidStateProof(trustedStateRoot, proof)
+```
+
+`verifyAccountProof`/`verifyStorageProof` are also exported individually for verifying just one half of a proof (e.g. an account proof with no storage slots requested). All four functions return a structured result rather than a plain boolean by default — `{ valid: false, reason }` tells you *why* a proof failed (hash mismatch, value mismatch, malformed encoding, oversized input) rather than collapsing everything to `false`.
+
 ## 🔌 Plugin System
 
 The SDK ships a first-class plugin architecture so community developers can extend the `WhitechainSDK` instance with custom namespaces — NFT marketplace helpers, lending calculators, analytics modules — without forking the core SDK or adding bloat to the core bundle.
