@@ -1,8 +1,108 @@
 import { http, type Transport } from 'viem'
 import type { WhiteChainConfig, WhiteChainAddresses } from '../types.js'
 import type { NetworkProfile } from '../config/networks.js'
+import { TimeoutError, ValidationError } from '../errors/index.js'
 
 type RateLimitListener = () => void
+type JsonRpcResponse<T> = {
+  result?: T
+  error?: { message?: string }
+}
+
+export interface WaitForTransactionOptions {
+  intervalMs?: number
+  timeoutMs?: number
+}
+
+export interface ProviderOptions {
+  /** Maximum number of retry attempts on HTTP 429 rate limit responses (default: 3). */
+  maxRetries?: number
+  /** Base delay in milliseconds for exponential backoff calculations (default: 100). */
+  baseDelayMs?: number
+  /** Custom fetch implementation for network requests or testing. */
+  fetchFn?: typeof fetch
+}
+
+export interface ProviderOptions {
+  /** Maximum number of retry attempts on HTTP 429 rate limit responses (default: 3). */
+  maxRetries?: number
+  /** Base delay in milliseconds for exponential backoff calculations (default: 100). */
+  baseDelayMs?: number
+  /** Custom fetch implementation for network requests or testing. */
+  fetchFn?: typeof fetch
+}
+
+export interface ProviderOptions {
+  /** Maximum number of retry attempts on HTTP 429 rate limit responses (default: 3). */
+  maxRetries?: number
+  /** Base delay in milliseconds for exponential backoff calculations (default: 100). */
+  baseDelayMs?: number
+  /** Custom fetch implementation for network requests or testing. */
+  fetchFn?: typeof fetch
+}
+
+export interface ProviderOptions {
+  /** Maximum number of retry attempts on HTTP 429 rate limit responses (default: 3). */
+  maxRetries?: number
+  /** Base delay in milliseconds for exponential backoff calculations (default: 100). */
+  baseDelayMs?: number
+  /** Custom fetch implementation for network requests or testing. */
+  fetchFn?: typeof fetch
+}
+
+export interface ProviderOptions {
+  /** Maximum number of retry attempts on HTTP 429 rate limit responses (default: 3). */
+  maxRetries?: number
+  /** Base delay in milliseconds for exponential backoff calculations (default: 100). */
+  baseDelayMs?: number
+  /** Custom fetch implementation for network requests or testing. */
+  fetchFn?: typeof fetch
+}
+
+export interface ProviderOptions {
+  /** Maximum number of retry attempts on HTTP 429 rate limit responses (default: 3). */
+  maxRetries?: number
+  /** Base delay in milliseconds for exponential backoff calculations (default: 100). */
+  baseDelayMs?: number
+  /** Custom fetch implementation for network requests or testing. */
+  fetchFn?: typeof fetch
+}
+
+export interface ProviderOptions {
+  /** Maximum number of retry attempts on HTTP 429 rate limit responses (default: 3). */
+  maxRetries?: number
+  /** Base delay in milliseconds for exponential backoff calculations (default: 100). */
+  baseDelayMs?: number
+  /** Custom fetch implementation for network requests or testing. */
+  fetchFn?: typeof fetch
+}
+
+export interface ProviderOptions {
+  /** Maximum number of retry attempts on HTTP 429 rate limit responses (default: 3). */
+  maxRetries?: number
+  /** Base delay in milliseconds for exponential backoff calculations (default: 100). */
+  baseDelayMs?: number
+  /** Custom fetch implementation for network requests or testing. */
+  fetchFn?: typeof fetch
+}
+
+export interface ProviderOptions {
+  /** Maximum number of retry attempts on HTTP 429 rate limit responses (default: 3). */
+  maxRetries?: number
+  /** Base delay in milliseconds for exponential backoff calculations (default: 100). */
+  baseDelayMs?: number
+  /** Custom fetch implementation for network requests or testing. */
+  fetchFn?: typeof fetch
+}
+
+export interface ProviderOptions {
+  /** Maximum number of retry attempts on HTTP 429 rate limit responses (default: 3). */
+  maxRetries?: number
+  /** Base delay in milliseconds for exponential backoff calculations (default: 100). */
+  baseDelayMs?: number
+  /** Custom fetch implementation for network requests or testing. */
+  fetchFn?: typeof fetch
+}
 
 export interface ProviderOptions {
   /** Maximum number of retry attempts on HTTP 429 rate limit responses (default: 3). */
@@ -26,7 +126,7 @@ export class Provider {
 
   constructor(network: NetworkProfile, options?: ProviderOptions) {
     if (!network || typeof network.chainId !== 'number') {
-      throw new Error('Invalid network profile provided to Provider')
+      throw new ValidationError('Invalid network profile provided to Provider')
     }
     this.network = network
     this.chainId = network.chainId
@@ -68,6 +168,55 @@ export class Provider {
   public emit(event: 'rateLimit') {
     if (event === 'rateLimit') {
       this._listeners.forEach((listener) => listener())
+    }
+  }
+
+  public async request<T = unknown>(method: string, params: unknown[] = []): Promise<T> {
+    const response = await fetch(this.rpcUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method,
+        params,
+      }),
+    })
+
+    if (response.status === 429) {
+      this.emit('rateLimit')
+    }
+
+    const payload = await response.json() as JsonRpcResponse<T>
+    if (payload.error) {
+      throw new Error(payload.error.message || `RPC request failed: ${method}`)
+    }
+
+    return payload.result as T
+  }
+
+  public async waitForTransaction<T = unknown>(
+    hash: string,
+    options: WaitForTransactionOptions = {},
+  ): Promise<T> {
+    if (!hash || typeof hash !== 'string') {
+      throw new ValidationError('Transaction hash is required')
+    }
+
+    const intervalMs = options.intervalMs ?? 4000
+    const timeoutAt = options.timeoutMs === undefined ? null : Date.now() + options.timeoutMs
+
+    while (true) {
+      const receipt = await this.request<T | null>('eth_getTransactionReceipt', [hash])
+      if (receipt !== null) {
+        return receipt
+      }
+
+      if (timeoutAt !== null && Date.now() >= timeoutAt) {
+        throw new TimeoutError(`Timed out waiting for transaction receipt: ${hash}`)
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, intervalMs))
     }
   }
 

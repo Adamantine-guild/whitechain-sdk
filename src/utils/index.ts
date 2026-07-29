@@ -8,3 +8,8 @@ export {
   type EIP2612Domain,
   type PermitTypes,
 } from './permit.js'
+  validateStakingInput,
+  type StakingValidationOptions,
+  type ValidationResult,
+} from './validation.js'
+export { toChecksumAddress, isAddress, assertChecksumAddress } from './address.js'

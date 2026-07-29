@@ -46,6 +46,9 @@ contract Vault {
 
     fallback() external payable {
         revert("Vault: fallback function disabled");
+    constructor(string memory _name, string memory _symbol) {
+        name = _name;
+        symbol = _symbol;
     }
 
     /**
