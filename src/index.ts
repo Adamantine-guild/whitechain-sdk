@@ -72,7 +72,7 @@ export {
   type GetOnChainNonceFn,
 } from './wallet/index.js'
 
-
+export {
   IpcProvider,
   type IpcProviderOptions,
 } from './providers/IpcProvider.js'
@@ -99,13 +99,11 @@ export type {
   Multicall3CallResult,
   Multicall3Options,
 } from './types/multicall.js'
-  Contract,
-  type ContractClient,
+export {
   ContractWrapper,
   type ContractWrapperOptions,
   type ReadCallOptions,
-} from './core/index.js'
-export { HDWallet, createHDWallet, type HDWalletOptions } from './wallet/HDWallet.js'
+} from './core/ContractWrapper.js'
 export {
   SubgraphClient,
   createSubgraphClient,
@@ -117,9 +115,6 @@ export {
   type GetTopTradersOptions,
   type GetTradesOptions,
 } from './subgraph/index.js'
-export { Contract, type ContractClient } from './core/Contract.js'
-export { HDWallet, createHDWallet, type HDWalletOptions } from './wallet/HDWallet.js'
-export { Contract, type ContractClient } from './core/Contract.js'
 
 export {
   MockProvider,
@@ -154,3 +149,16 @@ export type {
   SDKLogger,
   PluginMeta,
 } from './interfaces/ISDKPlugin.js'
+
+// ---------------------------------------------------------------------------
+// Offline / air-gapped transaction signing (cold storage)
+// ---------------------------------------------------------------------------
+
+export {
+  OfflineSigner,
+  signOfflineTransaction,
+  type OfflineTransaction,
+  type OfflineLegacyTransaction,
+  type OfflineEip1559Transaction,
+  type SignedOfflineTransaction,
+} from './security/index.js'

@@ -74,6 +74,76 @@ const isValid = await verify(messageHash, signature, publicKey)
 
 Both backends produce identical, low-S-normalized, RFC6979-deterministic output for the same input — the WASM path is purely a performance optimization, never a behavioral change.
 
+## 🔒 Offline Transaction Signing (Cold Storage)
+
+`whitechain-sdk/security` exposes `OfflineSigner`, a dedicated signer for **air-gapped** environments — machines with no network connection at all, such as a cold-storage laptop or hardware-adjacent signing device. It constructs and signs legacy and EIP-1559 transactions using only values you supply directly.
+
+**Zero network dependencies, by construction:** `OfflineSigner` does not accept a provider, transport, public client, wallet client, RPC URL, chain RPC configuration, or SDK context of any kind — there is no parameter slot for one. It never calls `fetch`, `XMLHttpRequest`, `WebSocket`, an HTTP library, a viem client action, or a network-discovery function, and it never calls `getNetwork`, `getChainId`, `getTransactionCount`, `estimateGas`, `getGasPrice`, `estimateFeesPerGas`, `prepareTransactionRequest`, or any other helper that could silently fill in a missing field via RPC. Every field must come from you; a missing or invalid one fails immediately and locally with a `ValidationError`, never a network error.
+
+### The three-stage air-gapped workflow
+
+**1. Online preparation** *(internet-connected machine)*
+- Fetch the account's next nonce, the current chain ID, an appropriate gas limit, and current fee data (`maxFeePerGas`/`maxPriorityFeePerGas`, or `gasPrice` for a legacy transaction).
+- Assemble these into a plain, unsigned transaction object.
+- Transfer **only this unsigned transaction data** to the offline environment (QR code, USB drive, manual entry) — never the private key in the other direction.
+
+**2. Offline signing** *(air-gapped machine, no network connection)*
+- Import or otherwise securely provide the private key to this machine.
+- Construct an `OfflineSigner` with it.
+- Call `signTransaction(...)`, passing only the manually supplied values from stage 1.
+- Export the resulting raw signed transaction hex.
+- The private key never leaves this machine — it is never transmitted, logged, or included in any error message.
+
+**3. Online broadcast** *(internet-connected machine)*
+- Transfer only the signed raw transaction hex back — never the private key.
+- Broadcast it via `eth_sendRawTransaction` (or `publicClient.sendRawTransaction({ serializedTransaction })`) on any online node.
+- A successfully *signed* transaction can still fail at this stage: if the nonce, fee levels, account balance, or other chain state changed between stage 1 and stage 3 (for example, another transaction from the same account was mined in between), the node may reject it. Re-run stage 1 with fresh values if that happens.
+
+```ts
+import { OfflineSigner } from 'whitechain-sdk/security'
+
+// Stage 2 — air-gapped machine. `privateKey` never leaves this process.
+const signer = new OfflineSigner(privateKey) // 0x-prefixed hex or Uint8Array
+
+const signed = await signer.signTransaction({
+  type: 'eip1559',
+  chainId: 1,
+  nonce: 12,                          // from stage 1, supplied by you
+  to: '0xRecipient...',
+  value: 1_000000000_000000000n,      // 1 ETH, in wei
+  gas: 21_000n,                       // from stage 1, supplied by you
+  maxFeePerGas: 30_000000000n,        // from stage 1, supplied by you
+  maxPriorityFeePerGas: 2_000000000n, // required — no RPC to estimate a default from
+})
+
+// signed.raw is the payload for stage 3 — hand it to an online node:
+// await publicClient.sendRawTransaction({ serializedTransaction: signed.raw })
+console.log(signed.raw)   // 0x02...  (ready to broadcast)
+console.log(signed.hash)  // keccak256(signed.raw) — matches eth_sendRawTransaction's return value
+console.log(signed.from)  // the address that produced the signature
+```
+
+Legacy (pre-EIP-1559) transactions are supported the same way, priced with `gasPrice` instead of `maxFeePerGas`/`maxPriorityFeePerGas`:
+
+```ts
+const signed = await signer.signTransaction({
+  chainId: 1,
+  nonce: 12,
+  to: '0xRecipient...',
+  value: 0n,
+  gas: 21_000n,
+  gasPrice: 20_000000000n,
+})
+```
+
+Contract creation is supported by omitting `to` (or passing `null`) alongside deployment `data` — this is only ever intentional, since a normal transfer or call always specifies `to`.
+
+All fields are validated locally and strictly: private key format/length, `chainId`/`nonce` as safe integers, a positive `gas` limit, non-negative fee/value fields, `maxFeePerGas >= maxPriorityFeePerGas`, address format/checksum, and well-formed hex call data. Every failure throws `ValidationError` synchronously or via a rejected promise — never a network error, since no network call is ever made.
+
+### ⚠️ Security warning
+
+`OfflineSigner` guarantees that the **signing step itself** performs no network I/O — that guarantee is enforced in code and covered by tests. It **cannot** guarantee the security of anything around that step: the operating system on the air-gapped machine, the removable media used to move data across the gap, how or where the private key is generated and stored, or the physical transfer process. Those remain entirely your responsibility. Treat the offline machine as if it will eventually be compromised, and design your key-management practices accordingly.
+
 ## 🔌 Plugin System
 
 The SDK ships a first-class plugin architecture so community developers can extend the `WhitechainSDK` instance with custom namespaces — NFT marketplace helpers, lending calculators, analytics modules — without forking the core SDK or adding bloat to the core bundle.
