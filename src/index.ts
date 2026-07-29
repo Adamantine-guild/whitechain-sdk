@@ -145,6 +145,23 @@ export {
   type SignerBackend,
 } from './crypto/index.js'
 
+// ---------------------------------------------------------------------------
+// Cross-chain state proof verifier (EIP-1186 account/storage proofs)
+// ---------------------------------------------------------------------------
+
+export {
+  verifyAccountProof,
+  verifyStorageProof,
+  verifyEIP1186Proof,
+  isValidStateProof,
+  EMPTY_TRIE_ROOT,
+  EMPTY_CODE_HASH,
+  type AccountProofInput,
+  type StorageProofInput,
+  type ProofVerificationResult,
+  type EIP1186VerificationResult,
+} from './crypto/StateProver.js'
+
 export { Simulator } from './services/Simulator.js'
 export type { SimulationResult, SimulationOptions, TransferEvent, StateOverrides } from './types/simulation.js'
 // ---------------------------------------------------------------------------
