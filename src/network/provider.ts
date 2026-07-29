@@ -113,6 +113,15 @@ export interface ProviderOptions {
   fetchFn?: typeof fetch
 }
 
+export interface ProviderOptions {
+  /** Maximum number of retry attempts on HTTP 429 rate limit responses (default: 3). */
+  maxRetries?: number
+  /** Base delay in milliseconds for exponential backoff calculations (default: 100). */
+  baseDelayMs?: number
+  /** Custom fetch implementation for network requests or testing. */
+  fetchFn?: typeof fetch
+}
+
 export class Provider {
   public readonly network: NetworkProfile
   public readonly chainId: number
