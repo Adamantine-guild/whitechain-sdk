@@ -171,6 +171,20 @@ export {
 
 export { Simulator } from './services/Simulator.js'
 export type { SimulationResult, SimulationOptions, TransferEvent, StateOverrides } from './types/simulation.js'
+export {
+  MulticallService,
+  MULTICALL3_ADDRESS,
+  MULTICALL3_ADDRESSES,
+  getMulticall3Address,
+  multicall3Abi,
+  type MulticallRequest,
+  type MulticallResult,
+  type MulticallResults,
+  type MulticallSuccess,
+  type MulticallFailure,
+  type MulticallServiceOptions,
+  type MulticallExecuteOptions,
+} from './services/MulticallService.js'
 // ---------------------------------------------------------------------------
 // Plugin system
 // ---------------------------------------------------------------------------
