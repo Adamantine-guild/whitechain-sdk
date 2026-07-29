@@ -3,6 +3,7 @@ export {
   type WhiteChainClient,
 } from './client.js'
 export { formatUnits, parseUnits } from './utils/math.js'
+
 export {
   validateStakingInput,
   type StakingValidationOptions,
@@ -84,6 +85,25 @@ export {
 
 export type { RpcProviderConfig } from './types/config.js'
 
+export {
+  Contract,
+  type ContractClient,
+  ContractWrapper,
+  type ContractWrapperOptions,
+  type ReadCallOptions,
+} from './core/index.js'
+export { HDWallet, createHDWallet, type HDWalletOptions } from './wallet/HDWallet.js'
+export {
+  SubgraphClient,
+  createSubgraphClient,
+  type SubgraphClientOptions,
+  type Trader,
+  type Trade,
+  type VaultSnapshot,
+  type SubgraphSyncStatus,
+  type GetTopTradersOptions,
+  type GetTradesOptions,
+} from './subgraph/index.js'
 export { Contract, type ContractClient } from './core/Contract.js'
 export { HDWallet, createHDWallet, type HDWalletOptions } from './wallet/HDWallet.js'
 export { Contract, type ContractClient } from './core/Contract.js'
