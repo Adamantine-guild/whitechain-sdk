@@ -1,4 +1,4 @@
-import { WhiteChainError } from "../types.js";
+import { ValidationError, WhiteChainError } from "../errors/index.js";
 import type {
   Multicall3Call,
   Multicall3CallResult,
@@ -18,6 +18,34 @@ export const DEFAULT_MULTICALL3_ADDRESS =
 export const AGGREGATE3_SELECTOR = "0x82ad56cb";
 
 export type RpcFetchFn = (method: string, params: any[]) => Promise<any>;
+
+/**
+ * Returns true when a raw calldata string is 0x-prefixed, byte-aligned hex.
+ */
+export function isValidHexData(data: string): data is `0x${string}` {
+  return typeof data === "string" && /^0x(?:[0-9a-fA-F]{2})*$/.test(data);
+}
+
+function assertValidHexData(data: string, label: string): `0x${string}` {
+  if (typeof data !== "string") {
+    throw new ValidationError(`${label} must be a hex string.`);
+  }
+
+  if (!data.startsWith("0x")) {
+    throw new ValidationError(`${label} must start with 0x.`);
+  }
+
+  const rawData = data.slice(2);
+  if (rawData.length % 2 !== 0) {
+    throw new ValidationError(`${label} must contain an even number of hex characters.`);
+  }
+
+  if (!/^[0-9a-fA-F]*$/.test(rawData)) {
+    throw new ValidationError(`${label} contains non-hex characters.`);
+  }
+
+  return data as `0x${string}`;
+}
 
 /**
  * Encodes an array of Multicall3Call objects into ABI-compliant aggregate3 calldata.
@@ -50,7 +78,7 @@ export function encodeAggregate3(
     const targetAddrPadded = call.target.toLowerCase().replace(/^0x/, "").padStart(64, "0");
     const allowFailurePadded = (allowFailure ? 1 : 0).toString(16).padStart(64, "0");
 
-    const rawCallData = call.callData.replace(/^0x/, "");
+    const rawCallData = assertValidHexData(call.callData, `calls[${i}].callData`).slice(2);
     const callDataLenHex = (rawCallData.length / 2).toString(16).padStart(64, "0");
 
     // Pad callData to 32-byte boundary

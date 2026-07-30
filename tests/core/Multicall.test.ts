@@ -5,7 +5,9 @@ import {
   DEFAULT_MULTICALL3_ADDRESS,
   encodeAggregate3,
   decodeAggregate3Results,
+  isValidHexData,
 } from "../../src/core/Multicall.js";
+import { ValidationError } from "../../src/errors/index.js";
 import { WhiteChainError } from "../../src/types.js";
 import type { Multicall3Call } from "../../src/types/multicall.js";
 
@@ -129,6 +131,27 @@ describe("Multicall", () => {
     expect(results[1].success).toBe(false);
     expect(results[1].error).toBe("Call reverted or failed execution on-chain.");
     expect(results[1].value).toBeUndefined();
+  });
+
+  it("validates raw calldata before encoding aggregate3 payloads", () => {
+    const target = "0x1111111111111111111111111111111111111111";
+
+    expect(isValidHexData("0x")).toBe(true);
+    expect(isValidHexData("0x70a08231")).toBe(true);
+    expect(isValidHexData("0x70A08231")).toBe(true);
+    expect(isValidHexData("70a08231")).toBe(false);
+    expect(isValidHexData("0xabc")).toBe(false);
+    expect(isValidHexData("0xzz")).toBe(false);
+
+    expect(() => encodeAggregate3([{ target, callData: "70a08231" as any }])).toThrow(
+      ValidationError
+    );
+    expect(() => encodeAggregate3([{ target, callData: "0xabc" as any }])).toThrow(
+      "calls[0].callData must contain an even number of hex characters."
+    );
+    expect(() => encodeAggregate3([{ target, callData: "0xzz" as any }])).toThrow(
+      "calls[0].callData contains non-hex characters."
+    );
   });
 
   it("throws WhiteChainError if input calls array is empty or eth_call fails", async () => {
