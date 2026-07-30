@@ -31,6 +31,7 @@
       "types": "./dist/esm/zk/index.d.ts",
       "import": "./dist/esm/zk/index.js",
       "require": "./dist/cjs/zk/index.js"
+    },
     "./wallet": {
       "types": "./dist/esm/wallet/index.d.ts",
       "import": "./dist/esm/wallet/index.js",
@@ -87,7 +88,8 @@
     "@vitest/coverage-v8": "^1.6.1",
     "typedoc": "^0.28.20",
     "typescript": "^5.4.0",
-    "vitest": "^1.3.1"
+    "vitest": "^1.3.1",
+    "ws": "^8.16.0"
   },
   "peerDependencies": {
     "snarkjs": ">=0.7.0"
@@ -96,7 +98,5 @@
     "snarkjs": {
       "optional": true
     }
-    "vitest": "^1.3.1",
-    "ws": "^8.16.0"
   }
 }

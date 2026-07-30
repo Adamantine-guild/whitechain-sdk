@@ -15,6 +15,20 @@ export interface SubgraphClientOptions {
    * Custom fetch implementation for Node or browser environments.
    */
   fetchFn?: typeof fetch;
+
+  /**
+   * Maximum number of automatic retries for transient failures (network errors
+   * and HTTP 5xx responses). Set to 0 to disable retrying entirely.
+   * @default 3
+   */
+  retries?: number;
+
+  /**
+   * Base delay in milliseconds before the first retry. Subsequent retries wait
+   * exponentially longer (retryDelay, retryDelay * 2, retryDelay * 4, ...).
+   * @default 500
+   */
+  retryDelay?: number;
 }
 
 export interface Trader {
