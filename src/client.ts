@@ -53,13 +53,35 @@ export type WhiteChainClient = {
 
   /**
    * Switches the active network provider dynamically without destroying the client.
+   *
+   * @param chainId - Numeric chain identifier registered in `networks`.
+   * @returns Resolves when the public and wallet clients have been rebuilt for the new network.
    * @throws {WhiteChainError} if the chainId is not found in the registry.
+   *
+   * @example
+   * ```ts
+   * await client.switchNetwork(11155111)
+   * console.log(client.network?.name)
+   * ```
    */
   switchNetwork(chainId: number): Promise<void>
 
   /**
    * Dry-runs a transaction against the node's current state to validate outcomes
    * before signing (e.g., checking for expected token transfers or revert reasons).
+   *
+   * @param tx - Transaction request to simulate.
+   * @param options - Optional simulation controls such as state overrides.
+   * @returns A decoded simulation result with success, gas, and revert metadata.
+   *
+   * @example
+   * ```ts
+   * const result = await client.simulateTransaction({
+   *   to: client.addresses.grant,
+   *   data: encodedCall,
+   * })
+   * if (!result.success) console.warn(result.error)
+   * ```
    */
   simulateTransaction(
     tx: { to: Address; data: string; from?: Address; value?: bigint },
@@ -103,19 +125,50 @@ export type WhiteChainClient = {
 
   /**
    * Reads a grant round's current status and application count.
+   *
+   * @param grantId - On-chain grant round identifier.
+   * @returns The grant round status with bigint fields formatted as strings.
    * @throws {WhiteChainError} if no `abis.grant` was provided.
+   *
+   * @example
+   * ```ts
+   * const round = await client.getGrantRound(1n)
+   * console.log(round.status, round.applicationsCount)
+   * ```
    */
   getGrantRound(grantId: bigint): Promise<GrantRound>
 
   /**
    * Reads a grant application's current state.
+   *
+   * @param applicationId - On-chain grant application identifier.
+   * @returns Applicant, status, and metadata URI for the application.
    * @throws {WhiteChainError} if no `abis.grant` was provided.
+   *
+   * @example
+   * ```ts
+   * const application = await client.getGrantApplication(42n)
+   * if (application.status === 'approved') {
+   *   console.log(application.applicant)
+   * }
+   * ```
    */
   getGrantApplication(applicationId: bigint): Promise<GrantApplication>
 
   /**
    * Reads all milestones defined for a grant application.
+   *
+   * @param applicationId - On-chain grant application identifier.
+   * @returns Milestones with normalized status names and string IDs.
    * @throws {WhiteChainError} if no `abis.grant` was provided.
+   *
+   * @example
+   * ```ts
+   * const milestones = await client.getMilestones(42n)
+   * for (const milestone of milestones) {
+   *   console.log(milestone.id, milestone.status)
+   * }
+   * ```
    */
   getMilestones(applicationId: bigint): Promise<Milestone[]>
 }
@@ -125,6 +178,24 @@ const defaultTransport = http()
 /**
  * Builds a {@link WhiteChainClient} for reading and writing to WhiteChain's
  * grant round contract.
+ *
+ * @param config - Network, transport, contract, ABI, and optional signing-account configuration.
+ * @returns A configured WhiteChain client with read, write, simulation, and network-switch helpers.
+ *
+ * @example
+ * ```ts
+ * import { createWhiteChainClient } from 'whitechain-sdk'
+ * import { http } from 'viem'
+ *
+ * const client = createWhiteChainClient({
+ *   chain,
+ *   transport: http('https://rpc.example'),
+ *   addresses: { grant: grantAddress },
+ *   abis: { grant: grantAbi },
+ * })
+ *
+ * const round = await client.getGrantRound(1n)
+ * ```
  *
  * Pass an `account` in `config` to enable write methods (submitting
  * applications, approving, releasing payouts); omit it to get a read-only
