@@ -19,14 +19,22 @@ import type {
 export const DEFAULT_SUBGRAPH_URL =
   "https://api.thegraph.com/subgraphs/name/whitechain/mainnet";
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export class SubgraphClient {
   public readonly url: string;
   public readonly syncWarningThreshold: number;
+  public readonly retries: number;
+  public readonly retryDelay: number;
   private readonly fetchFn: typeof fetch;
 
   constructor(options: SubgraphClientOptions = {}) {
     this.url = options.url || DEFAULT_SUBGRAPH_URL;
     this.syncWarningThreshold = options.syncWarningThreshold ?? 50;
+    this.retries = Math.max(0, options.retries ?? 3);
+    this.retryDelay = Math.max(0, options.retryDelay ?? 500);
     this.fetchFn = options.fetchFn || globalThis.fetch;
 
     if (!this.fetchFn) {
@@ -38,28 +46,62 @@ export class SubgraphClient {
 
   /**
    * Executes a raw GraphQL query against the configured Subgraph endpoint.
+   *
+   * Transient failures (network errors and HTTP 5xx responses) are retried
+   * automatically up to `retries` times with exponential backoff
+   * (retryDelay, retryDelay * 2, retryDelay * 4, ...). Client errors (HTTP 4xx)
+   * and GraphQL-level errors are never retried.
    */
   async rawQuery<TData = any, TVariables = Record<string, any>>(
     query: string,
     variables?: TVariables
   ): Promise<TData> {
-    try {
-      const response = await this.fetchFn(this.url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({ query, variables }),
-      });
+    const maxAttempts = this.retries + 1;
+    let lastErrorMessage = `Failed to fetch from Subgraph (${this.url}).`;
 
-      if (!response.ok) {
-        throw new WhiteChainError(
-          `Subgraph request failed with HTTP status ${response.status}: ${response.statusText}`
-        );
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      if (attempt > 0) {
+        await sleep(this.retryDelay * 2 ** (attempt - 1));
+      }
+      const isLastAttempt = attempt === maxAttempts - 1;
+
+      let response: Response;
+      try {
+        response = await this.fetchFn(this.url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({ query, variables }),
+        });
+      } catch (err: any) {
+        // Network failure or timeout — transient, eligible for retry.
+        lastErrorMessage = `Failed to fetch from Subgraph (${this.url}): ${err.message}`;
+        if (isLastAttempt) break;
+        continue;
       }
 
-      const json = await response.json();
+      if (!response.ok) {
+        const message = `Subgraph request failed with HTTP status ${response.status}: ${response.statusText}`;
+        if (response.status >= 500 && !isLastAttempt) {
+          // Gateway/server errors are transient — retry with backoff.
+          lastErrorMessage = message;
+          continue;
+        }
+        // 4xx responses are permanent client errors and are never retried.
+        throw new WhiteChainError(message);
+      }
+
+      let json: any;
+      try {
+        json = await response.json();
+      } catch (err: any) {
+        // Truncated/invalid body from a flaky gateway — treat as transient.
+        lastErrorMessage = `Failed to fetch from Subgraph (${this.url}): ${err.message}`;
+        if (isLastAttempt) break;
+        continue;
+      }
 
       if (json.errors && json.errors.length > 0) {
         const errorMessages = json.errors.map((e: any) => e.message).join("; ");
@@ -67,12 +109,9 @@ export class SubgraphClient {
       }
 
       return json.data as TData;
-    } catch (err: any) {
-      if (err instanceof WhiteChainError) {
-        throw err;
-      }
-      throw new WhiteChainError(`Failed to fetch from Subgraph (${this.url}): ${err.message}`);
     }
+
+    throw new WhiteChainError(lastErrorMessage);
   }
 
   /**
