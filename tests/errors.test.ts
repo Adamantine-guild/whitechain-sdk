@@ -4,6 +4,8 @@ import {
   RpcError,
   ValidationError,
   TimeoutError,
+  ContractRevertError,
+  TransactionRevertedError,
 } from '../src/index.js'
 
 describe('Error classes', () => {
@@ -123,11 +125,33 @@ describe('Error classes', () => {
     })
   })
 
+  describe('ContractRevertError', () => {
+    it('is instanceof WhiteChainError and TransactionRevertedError', () => {
+      const err = new ContractRevertError({
+        message: 'execution reverted: Unauthorized',
+        reason: 'Unauthorized',
+        rawData: '0x1234',
+        rpcCode: -32000,
+        customErrorName: 'Unauthorized',
+      })
+
+      expect(err).toBeInstanceOf(Error)
+      expect(err).toBeInstanceOf(WhiteChainError)
+      expect(err).toBeInstanceOf(TransactionRevertedError)
+      expect(err).toBeInstanceOf(ContractRevertError)
+      expect(err.reason).toBe('Unauthorized')
+      expect(err.rawData).toBe('0x1234')
+      expect(err.rpcCode).toBe(-32000)
+      expect(err.customErrorName).toBe('Unauthorized')
+    })
+  })
+
   describe('instanceof discrimination across all types', () => {
     const errors = [
       new RpcError('rpc'),
       new ValidationError('validation'),
       new TimeoutError('timeout'),
+      new ContractRevertError({ message: 'revert' }),
     ]
 
     it('RpcError is only instanceof RpcError (not TimeoutError/ValidationError)', () => {

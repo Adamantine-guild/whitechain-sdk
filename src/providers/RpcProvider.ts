@@ -1,6 +1,6 @@
 import type { Transport } from 'viem'
 import { custom } from 'viem'
-import { WhiteChainError } from '../types.js'
+import { ContractRevertError, WhiteChainError } from '../errors/index.js'
 import type { RpcProviderConfig } from '../types/config.js'
 
 export type RpcProviderOptions = RpcProviderConfig
@@ -21,6 +21,16 @@ export interface JsonRpcResponse<T = unknown> {
     message: string
     data?: unknown
   }
+}
+
+function extractRevertReason(message: string): string | undefined {
+  const match = message.match(/execution reverted(?::\s*)?(.*)$/i)
+  const reason = match?.[1]?.trim()
+  return reason || undefined
+}
+
+function isContractRevertError(error: JsonRpcResponse['error']): boolean {
+  return error?.code === 3 || /revert/i.test(error?.message ?? '')
 }
 
 /**
@@ -97,6 +107,14 @@ export class RpcProvider {
         const json = (await response.json()) as JsonRpcResponse<T>
         if (json.error) {
           // Contract reverts and JSON-RPC execution errors fail immediately
+          if (isContractRevertError(json.error)) {
+            throw new ContractRevertError({
+              message: `JSON-RPC Error [${json.error.code}]: ${json.error.message}`,
+              reason: extractRevertReason(json.error.message),
+              rawData: json.error.data,
+              rpcCode: json.error.code,
+            })
+          }
           throw new WhiteChainError(`JSON-RPC Error [${json.error.code}]: ${json.error.message}`)
         }
 

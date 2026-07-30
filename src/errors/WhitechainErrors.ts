@@ -27,6 +27,31 @@ export class TransactionRevertedError extends SDKError {
 }
 
 /**
+ * Thrown when an RPC call or transaction response explicitly reports a smart
+ * contract revert.
+ */
+export class ContractRevertError extends TransactionRevertedError {
+  public readonly rawData?: unknown;
+  public readonly rpcCode?: number;
+  public readonly customErrorName?: string;
+
+  constructor(options: {
+    message: string;
+    reason?: string;
+    rawData?: unknown;
+    rpcCode?: number;
+    customErrorName?: string;
+    args?: readonly unknown[];
+  }) {
+    super(options.message, options.reason, options.args);
+    this.name = 'ContractRevertError';
+    this.rawData = options.rawData;
+    this.rpcCode = options.rpcCode;
+    this.customErrorName = options.customErrorName;
+  }
+}
+
+/**
  * Fallback for unparseable or unknown transaction errors.
  */
 export class UnknownTransactionError extends SDKError {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { RpcProvider, createRpcProvider, createWhiteChainClient } from '../../src/index.js'
+import { ContractRevertError, RpcProvider, createRpcProvider, createWhiteChainClient } from '../../src/index.js'
 import type { Address } from 'viem'
 
 describe('RpcProvider', () => {
@@ -49,8 +49,47 @@ describe('RpcProvider', () => {
       fetchFn: mockFetch,
     })
 
-    await expect(provider.request('eth_call', [])).rejects.toThrow('JSON-RPC Error [-32000]: execution reverted')
+    await expect(provider.request('eth_call', [])).rejects.toThrow(ContractRevertError)
     expect(callCount).toBe(1) // Immediate failure, 0 retries
+  })
+
+  it('exposes revert metadata for typed handling', async () => {
+    const revertData = '0x08c379a0'
+    const mockFetch = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          error: {
+            code: -32000,
+            message: 'execution reverted: Insufficient balance',
+            data: revertData,
+          },
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      )
+    )
+
+    const provider = new RpcProvider({
+      url: 'https://rpc.whitechain.io',
+      maxRetries: 3,
+      initialDelayMs: 10,
+      fetchFn: mockFetch,
+    })
+
+    try {
+      await provider.request('eth_call', [])
+      expect.fail('Expected request to throw')
+    } catch (error) {
+      expect(error).toBeInstanceOf(ContractRevertError)
+      const revert = error as ContractRevertError
+      expect(revert.reason).toBe('Insufficient balance')
+      expect(revert.rawData).toBe(revertData)
+      expect(revert.rpcCode).toBe(-32000)
+      expect(revert.message).toContain('execution reverted: Insufficient balance')
+    }
+
+    expect(mockFetch).toHaveBeenCalledTimes(1)
   })
 
   it('does NOT retry eth_sendRawTransaction to prevent double submission to mempool', async () => {
