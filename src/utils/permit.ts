@@ -5,7 +5,7 @@ export interface PermitTypes {
   Permit: Array<{ name: string; type: string }>
 }
 
-export const EIP2612_PERMIT_TYPES: PermitTypes = {
+export const EIP2612_PERMIT_TYPES = {
   Permit: [
     { name: 'owner', type: 'address' },
     { name: 'spender', type: 'address' },
@@ -13,7 +13,7 @@ export const EIP2612_PERMIT_TYPES: PermitTypes = {
     { name: 'nonce', type: 'uint256' },
     { name: 'deadline', type: 'uint256' },
   ],
-}
+} as const satisfies PermitTypes
 
 export interface EIP2612Domain {
   name: string

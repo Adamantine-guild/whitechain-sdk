@@ -15,6 +15,20 @@ export {
 } from './utils/permit.js'
 
 export {
+  buildPermitPayload,
+  hashPermitPayload,
+  verifySignature,
+  recoverPermitSigner,
+  parseEip712Signature,
+  WHITECHAIN_EIP712,
+  SECP256K1_HALF_ORDER,
+  type SignatureInput,
+  type PermitDomainOptions,
+  type PermitMessage,
+  type EIP712PermitPayload,
+} from './utils/signatures.js'
+
+export {
   validateStakingInput,
   type StakingValidationOptions,
   type ValidationResult,

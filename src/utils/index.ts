@@ -15,3 +15,16 @@ export {
   type ValidationResult,
 } from './validation.js'
 export { toChecksumAddress, isAddress, assertChecksumAddress } from './address.js'
+export {
+  WHITECHAIN_EIP712,
+  SECP256K1_HALF_ORDER,
+  buildPermitPayload,
+  hashPermitPayload,
+  verifySignature,
+  recoverPermitSigner,
+  parseEip712Signature,
+  type SignatureInput,
+  type PermitDomainOptions,
+  type PermitMessage,
+  type EIP712PermitPayload,
+} from './signatures.js'
