@@ -94,6 +94,7 @@ export {
   MockProvider,
   returns,
 } from './testing/MockProvider.js'
+export {
   RpcProvider,
   createRpcProvider,
   type RpcProviderOptions,

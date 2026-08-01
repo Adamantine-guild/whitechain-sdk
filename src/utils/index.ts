@@ -9,6 +9,7 @@ export {
   type EIP2612Domain,
   type PermitTypes,
 } from './permit.js'
+export {
   validateStakingInput,
   type StakingValidationOptions,
   type ValidationResult,
