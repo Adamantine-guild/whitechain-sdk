@@ -144,6 +144,67 @@ All fields are validated locally and strictly: private key format/length, `chain
 
 `OfflineSigner` guarantees that the **signing step itself** performs no network I/O — that guarantee is enforced in code and covered by tests. It **cannot** guarantee the security of anything around that step: the operating system on the air-gapped machine, the removable media used to move data across the gap, how or where the private key is generated and stored, or the physical transfer process. Those remain entirely your responsibility. Treat the offline machine as if it will eventually be compromised, and design your key-management practices accordingly.
 
+## ✍️ EIP-712 Offline Signature Verification (Permits)
+
+The protocol authenticates **gasless transactions** (ERC-20 permits) and **identity assertions** with [EIP-712](https://eips.ethereum.org/EIPS/eip-712) signed messages. Structuring these messages by hand is where integration bugs happen — a wrong domain separator, a mis-ordered type array, or a non-normalized signature all produce silent signature rejections on chain. The SDK's `src/utils/signatures.ts` module centralises the protocol's standard domain variables and provides native helpers to build, hash, and — critically — **independently verify** a permit signature before it is broadcast to the backend. Verification is fully offline: no provider, no RPC, no network I/O.
+
+### Protocol-standard domain variables
+
+`WHITECHAIN_EIP712` defines the domain the permit-enabled Whitelotus token contract expects. Every builder default derives from it; pass explicit overrides when targeting a different contract, chain, or version:
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `name` | `'Whitelotus'` | EIP-712 domain name |
+| `version` | `'1'` | EIP-712 domain version |
+| `chainId` | `1875` | WhiteChain mainnet |
+| `testnetChainId` | `2625` | WhiteChain testnet |
+
+### Building and verifying a permit
+
+```ts
+import { buildPermitPayload, verifySignature, recoverPermitSigner } from 'whitechain-sdk/utils'
+// or from the root: import { buildPermitPayload, verifySignature } from 'whitechain-sdk'
+
+// 1. Build the payload — matches what the contract recomputes in permit().
+const payload = buildPermitPayload(
+  owner,            // the signer
+  spender,          // address granted the allowance
+  1_000_000_000_000_000_000n, // 1 token, in wei
+  deadline,         // unix seconds; the contract enforces expiry, not the builder
+  nonce,            // current nonces(owner) from the token contract
+  {
+    verifyingContract: tokenAddress, // required — anchors the signature to the contract
+    // name/version/chainId default to WHITECHAIN_EIP712; override per deployment:
+    // chainId: WHITECHAIN_EIP712.testnetChainId,
+  },
+)
+
+// 2. Have the owner sign it (any EIP-712 wallet or viem account).
+const signature = await account.signTypedData(payload) // 0x + 130 hex chars
+
+// 3. Verify before broadcasting — offline, returns true/false.
+const valid = await verifySignature(payload, signature, owner)
+if (!valid) throw new Error('Signature does not match the expected signer')
+
+// Optional: recover the signer without knowing who to expect.
+const recovered = await recoverPermitSigner(payload, signature) // → owner
+```
+
+`verifySignature` also accepts a split `{ r, s, v }` signature object (v as `27/28` or `0/1`, `number` or `bigint`, or via `yParity`), matching what viem, ethers, and EIP-1193 providers return.
+
+### Debugging a rejected signature
+
+`hashPermitPayload(payload)` returns the exact digest the contract recomputes in `permit()` — `keccak256("\x19\x01" ‖ domainSeparator ‖ structHash)`. Compare it against your backend's value to isolate whether a rejection comes from a payload mismatch or a bad signature:
+
+```ts
+import { hashPermitPayload } from 'whitechain-sdk/utils'
+const digest = hashPermitPayload(payload)
+```
+
+### Anti-malleability
+
+EIP-712 signatures on secp256k1 have two equivalent forms: low-s (what the protocol's contracts accept) and high-s. Accepting the high-s variant would let an attacker substitute an equivalent signature for the same digest. `verifySignature` and `recoverPermitSigner` therefore **reject high-s signatures outright** with a `ValidationError` (the exported `SECP256K1_HALF_ORDER` constant backs the check). Malformed payloads and malformed signatures (bad length, bad `v`, zero `r`/`s`) fail fast with a `ValidationError` as well — a well-formed signature that simply doesn't match returns `false`.
+
 ## 🌉 Cross-Chain State Proof Verifier
 
 `whitechain-sdk/crypto` also exposes a local verifier for Ethereum [EIP-1186](https://eips.ethereum.org/EIPS/eip-1186) account and storage proofs — the Merkle Patricia Trie proofs a cross-chain bridge uses to prove "this account/storage slot had this value" against a specific chain state, without trusting the node that served the data.
