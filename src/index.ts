@@ -310,3 +310,24 @@ export {
   type ParsedNftTransfer,
   type TransferDirection,
 } from './utils/listeners.js'
+
+// ---------------------------------------------------------------------------
+// Multi-step transaction pipeline FSM (#123)
+// ---------------------------------------------------------------------------
+export {
+  TransactionPipeline,
+  createTransactionPipeline,
+  createMemoryStorage,
+  createLocalStorageAdapter,
+  type TransactionPipelineOptions,
+  type PipelineStatus,
+  type StepStatus,
+  type StepDefinition,
+  type StepHelpers,
+  type StepResult,
+  type StepSnapshot,
+  type PipelineSnapshot,
+  type PipelineEvent,
+  type PipelineListener,
+  type PipelineStorage,
+} from './pipeline/index.js'
