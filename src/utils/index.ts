@@ -28,3 +28,12 @@ export {
   type PermitMessage,
   type EIP712PermitPayload,
 } from './signatures.js'
+export {
+  withRetry,
+  computeBackoffDelay,
+  isRetryableError,
+  isRetryableHttpStatus,
+  RetryExhaustedError,
+  type RetryOptions,
+  type RetryAttemptInfo,
+} from './retry.js'

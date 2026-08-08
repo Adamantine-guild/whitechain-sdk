@@ -54,6 +54,15 @@ export * from './constants.js'
 export * from './config/networks.js'
 export * from './network/provider.js'
 export * from './network/BatchProvider.js'
+export {
+  withRetry,
+  computeBackoffDelay,
+  isRetryableError,
+  isRetryableHttpStatus,
+  RetryExhaustedError,
+  type RetryOptions,
+  type RetryAttemptInfo,
+} from './utils/retry.js'
 export { Contract } from './core/Contract.js'
 export * from './core/TransactionHelper.js'
 export { NetworkContext, type NetworkObserver, type NetworkState } from './core/NetworkContext.js'
