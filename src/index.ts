@@ -55,6 +55,16 @@ export * from './config/networks.js'
 export * from './network/provider.js'
 export * from './network/BatchProvider.js'
 export {
+  WsProvider,
+  createWsProvider,
+  computeReconnectDelay,
+  type WsProviderOptions,
+  type WsProviderEvent,
+  type WsReadyState,
+  type WebSocketLike,
+  type ActiveSubscription,
+} from './network/ws-provider.js'
+export {
   withRetry,
   computeBackoffDelay,
   isRetryableError,
