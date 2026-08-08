@@ -277,3 +277,18 @@ export {
   type OfflineEip1559Transaction,
   type SignedOfflineTransaction,
 } from './security/index.js'
+
+// ---------------------------------------------------------------------------
+// Typed contract event engine (#121)
+// ---------------------------------------------------------------------------
+export {
+  EventManager,
+  createEventManager,
+  type EventLogClient,
+  type EventManagerOptions,
+  type EventCallback,
+  type TypedEventLog,
+  type DecodedEventArgs,
+  type Unsubscribe,
+  type RawRpcLog,
+} from './events/index.js'
