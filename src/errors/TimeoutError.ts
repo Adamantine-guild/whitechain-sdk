@@ -1,4 +1,5 @@
 import { WhiteChainError } from './BaseError.js'
+import { SdkErrorCode } from './codes.js'
 
 /**
  * Thrown when an operation (like an RPC request) takes longer
@@ -6,6 +7,7 @@ import { WhiteChainError } from './BaseError.js'
  */
 export class TimeoutError extends WhiteChainError {
   constructor(message: string) {
-    super(message)
+    super(message, { code: SdkErrorCode.TIMEOUT })
+    this.name = 'TimeoutError'
   }
 }

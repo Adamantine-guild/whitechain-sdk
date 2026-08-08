@@ -93,6 +93,12 @@ export * from './storage/index.js'
 export * from './zk/index.js'
 export * from './errors/WhitechainErrors.js'
 export { parseContractError } from './utils/errorHandler.js'
+export {
+  decodeError,
+  extractRevertReason,
+  isUserRejection,
+  ensureSdkError,
+} from './utils/errorDecoder.js'
 export * from './storage/index.js'
 
 export {

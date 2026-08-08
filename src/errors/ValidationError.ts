@@ -1,4 +1,5 @@
 import { WhiteChainError } from './BaseError.js'
+import { SdkErrorCode } from './codes.js'
 
 /**
  * Thrown when arguments passed to SDK methods are invalid,
@@ -6,6 +7,7 @@ import { WhiteChainError } from './BaseError.js'
  */
 export class ValidationError extends WhiteChainError {
   constructor(message: string) {
-    super(message)
+    super(message, { code: SdkErrorCode.VALIDATION })
+    this.name = 'ValidationError'
   }
 }
