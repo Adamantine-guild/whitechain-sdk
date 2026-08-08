@@ -292,3 +292,21 @@ export {
   type Unsubscribe,
   type RawRpcLog,
 } from './events/index.js'
+
+// ---------------------------------------------------------------------------
+// ERC-20 / ERC-721 transfer listeners (#60)
+// ---------------------------------------------------------------------------
+export {
+  onTokenTransfer,
+  onNftTransfer,
+  getTransferTopics,
+  decodeTokenTransferLog,
+  padAddressTopic,
+  TRANSFER_EVENT_ABI,
+  ERC721_TRANSFER_EVENT_ABI,
+  type TokenTransferListenerOptions,
+  type NftTransferListenerOptions,
+  type ParsedTokenTransfer,
+  type ParsedNftTransfer,
+  type TransferDirection,
+} from './utils/listeners.js'
