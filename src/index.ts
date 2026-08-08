@@ -54,6 +54,16 @@ export * from './constants.js'
 export * from './config/networks.js'
 export * from './network/provider.js'
 export * from './network/BatchProvider.js'
+export {
+  WsProvider,
+  createWsProvider,
+  computeReconnectDelay,
+  type WsProviderOptions,
+  type WsProviderEvent,
+  type WsReadyState,
+  type WebSocketLike,
+  type ActiveSubscription,
+} from './network/ws-provider.js'
 export { Contract } from './core/Contract.js'
 export * from './core/TransactionHelper.js'
 export { NetworkContext, type NetworkObserver, type NetworkState } from './core/NetworkContext.js'

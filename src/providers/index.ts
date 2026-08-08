@@ -20,3 +20,11 @@ export {
   EnsResolver,
   createEnsResolver,
 } from './EnsResolver.js'
+export {
+  WsProvider,
+  createWsProvider,
+  computeReconnectDelay,
+  type WsProviderOptions,
+  type WsProviderEvent,
+  type WebSocketLike,
+} from '../network/ws-provider.js'
