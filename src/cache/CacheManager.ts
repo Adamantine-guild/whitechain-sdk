@@ -1,10 +1,18 @@
 import type { CacheAdapter } from './adapters/CacheAdapter.js'
 import { MemoryCache } from './adapters/MemoryCache.js'
+import { LRUMemoryCache } from './adapters/LRUMemoryCache.js'
 
 export interface CacheOptions {
   enabled?: boolean
   adapter?: CacheAdapter
   defaultTtlMs?: number
+  /**
+   * When no custom adapter is provided, use a capacity-bounded LRU backend
+   * instead of the unbounded MemoryCache. Default: true.
+   */
+  useLru?: boolean
+  /** Max entries for the default LRU adapter (default: 500). */
+  maxSize?: number
 }
 
 export interface CacheKeyParams {
@@ -17,6 +25,9 @@ export interface CacheKeyParams {
 /**
  * CacheManager manages caching read calls across the SDK.
  * Cache keys uniquely identify chain ID, contract address, function name, and arguments.
+ *
+ * By default uses a capacity-bounded LRUMemoryCache (max 500 entries) so long-running
+ * processes cannot leak unbounded memory from static metadata lookups.
  */
 export class CacheManager {
   public enabled: boolean
@@ -25,8 +36,17 @@ export class CacheManager {
 
   constructor(options: CacheOptions = {}) {
     this.enabled = options.enabled ?? true
-    this.adapter = options.adapter ?? new MemoryCache()
     this.defaultTtlMs = options.defaultTtlMs
+    if (options.adapter) {
+      this.adapter = options.adapter
+    } else if (options.useLru === false) {
+      this.adapter = new MemoryCache()
+    } else {
+      this.adapter = new LRUMemoryCache({
+        maxSize: options.maxSize ?? 500,
+        defaultTtlMs: options.defaultTtlMs,
+      })
+    }
   }
 
   public generateKey(params: CacheKeyParams): string {

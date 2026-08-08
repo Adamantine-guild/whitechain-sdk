@@ -78,6 +78,29 @@ export * from './core/TransactionHelper.js'
 export { NetworkContext, type NetworkObserver, type NetworkState } from './core/NetworkContext.js'
 export { AbiCache, abiCache } from './core/AbiCache.js'
 
+// ---------------------------------------------------------------------------
+// In-memory LRU cache + token metadata service (#118)
+// ---------------------------------------------------------------------------
+export { LRUCache, createLRUCache, type LRUCacheOptions, type LRUCacheStats } from './cache/LRUCache.js'
+export { LRUMemoryCache, type LRUMemoryCacheOptions } from './cache/adapters/LRUMemoryCache.js'
+export {
+  CacheManager,
+  defaultCacheManager,
+  type CacheOptions,
+  type CacheKeyParams,
+} from './cache/CacheManager.js'
+export { MemoryCache } from './cache/adapters/MemoryCache.js'
+export type { CacheAdapter, CacheEntry } from './cache/adapters/CacheAdapter.js'
+export {
+  TokenService,
+  createTokenService,
+  clearSdkCache,
+  ERC20_METADATA_ABI,
+  type TokenServiceOptions,
+  type TokenMetadata,
+  type TokenReadClient,
+} from './services/TokenService.js'
+
 export type {
   WhiteChainConfig,
   WhiteChainAddresses,
